@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Focus — Pomodoro Timer</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Nunito+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --cream: #f5efe6;
+  --amber: #d4a876;
+  --sage:  #8aab7e;
+  --glass: rgba(255, 248, 240, 0.07);
+  --border: rgba(255, 248, 240, 0.13);
+  --shadow: 0 12px 56px rgba(0,0,0,0.45);
+}
+
+html, body {
+  height: 100%;
+  font-family: 'Nunito Sans', sans-serif;
+  color: var(--cream);
+  overflow: hidden;
+}
+
+/* ── Background ─────────────────────────────── */
+#bg {
+  position: fixed; inset: 0; z-index: -2;
+  background-image: url('https://images.unsplash.com/photo-1448375240586-882707db888b?w=1920&q=80');
+  background-size: cover;
+  background-position: center 40%;
+  filter: brightness(0.62) saturate(0.85);
+  transform: scale(1.04);
+  transition: filter 1.8s ease;
+}
+#overlay {
+  position: fixed; inset: 0; z-index: -1;
+  background: linear-gradient(160deg, rgba(6,5,3,0.52) 0%, rgba(18,12,6,0.28) 60%, rgba(4,10,8,0.48) 100%);
+}
+
+/* ── Layout ─────────────────────────────────── */
+.app {
+  height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 310px;
+  grid-template-rows: auto 1fr;
+  gap: 18px;
+  padding: 28px 32px;
+  max-width: 1140px;
+  margin: 0 auto;
+}
+
+/* ── Header ─────────────────────────────────── */
+.header {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-weight: 300;
+  font-size: 1.45rem;
+  letter-spacing: 0.14em;
+  color: var(--amber);
+  opacity: 0.88;
+}
+
+.mode-toggle {
+  display: flex;
+  gap: 3px;
+  background: rgba(0,0,0,0.25);
+  border: 1px solid var(--border);
+  border-radius: 50px;
+  padding: 4px;
+  backdrop-filter: blur(16px);
+}
+
+.mode-btn {
+  background: transparent;
+  border: none;
+  color: var(--cream);
+  font-family: 'Nunito Sans', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 6px 16px;
+  border-radius: 50px;
+  cursor: pointer;
+  opacity: 0.45;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+.mode-btn.active { background: var(--amber); color: #1a1008; opacity: 1; }
+.mode-btn.break-active { background: var(--sage); color: #0d1a0d; opacity: 1; }
+
+/* ── Timer Card ─────────────────────────────── */
+.timer-card {
+  background: var(--glass);
+  border: 1px solid var(--border);
+  border-radius: 28px;
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 30px;
+  padding: 48px 40px;
+  box-shadow: var(--shadow);
+  position: relative;
+  overflow: hidden;
+}
+
+/* subtle inner glow */
+.timer-card::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 28px;
+  background: radial-gradient(ellipse 60% 40% at 50% 0%, rgba(212,168,118,0.07), transparent 70%);
+  pointer-events: none;
+}
+
+/* ── SVG Ring ───────────────────────────────── */
+.ring-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.timer-ring { transform: rotate(-90deg); }
+
+.ring-bg {
+  fill: none;
+  stroke: rgba(255,248,240,0.07);
+  stroke-width: 2.5;
+}
+
+.ring-track {
+  fill: none;
+  stroke: rgba(255,248,240,0.04);
+  stroke-width: 2.5;
+  stroke-dasharray: 6 6;
+}
+
+.ring-progress {
+  fill: none;
+  stroke: var(--amber);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-dasharray: 678.6;
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset 1s linear, stroke 0.6s ease;
+  filter: drop-shadow(0 0 10px rgba(212,168,118,0.55));
+}
+.ring-progress.is-break {
+  stroke: var(--sage);
+  filter: drop-shadow(0 0 10px rgba(138,171,126,0.55));
+}
+
+.timer-center {
+  position: absolute;
+  text-align: center;
+  user-select: none;
+}
+
+.time-display {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 5rem;
+  font-weight: 300;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  color: var(--cream);
+}
+
+.mode-label {
+  margin-top: 8px;
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--amber);
+  opacity: 0.65;
+  transition: color 0.5s ease;
+}
+.mode-label.is-break { color: var(--sage); }
+
+/* ── Controls ───────────────────────────────── */
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.btn-icon {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--cream);
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.55;
+  transition: all 0.2s ease;
+  font-size: 1rem;
+}
+.btn-icon:hover { opacity: 1; border-color: rgba(255,248,240,0.4); }
+
+.btn-play {
+  background: var(--amber);
+  border: none;
+  color: #16100a;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+  box-shadow: 0 4px 24px rgba(212,168,118,0.38), 0 0 0 0 rgba(212,168,118,0);
+  transition: all 0.22s ease;
+}
+.btn-play:hover {
+  transform: scale(1.08);
+  box-shadow: 0 8px 32px rgba(212,168,118,0.52);
+}
+.btn-play.is-break {
+  background: var(--sage);
+  box-shadow: 0 4px 24px rgba(138,171,126,0.38);
+}
+.btn-play.is-break:hover {
+  box-shadow: 0 8px 32px rgba(138,171,126,0.52);
+}
+
+/* ── Session Pips ───────────────────────────── */
+.pips {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.pip {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: rgba(255,248,240,0.12);
+  transition: background 0.4s ease, transform 0.3s ease;
+}
+.pip.done { background: var(--amber); }
+.pip.done.bounce { animation: pipBounce 0.35s ease; }
+
+@keyframes pipBounce {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.5); }
+  100% { transform: scale(1); }
+}
+
+/* ── Sidebar ─────────────────────────────────── */
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-height: 0;
+}
+
+/* ── Panel base ─────────────────────────────── */
+.panel {
+  background: var(--glass);
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  padding: 24px 22px;
+  box-shadow: var(--shadow);
+}
+
+.panel-label {
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--cream);
+  opacity: 0.35;
+  margin-bottom: 18px;
+}
+
+/* ── Sound Grid ─────────────────────────────── */
+.sound-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.sound-btn {
+  background: rgba(255,248,240,0.05);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  color: var(--cream);
+  padding: 14px 8px 12px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.22s ease;
+  font-family: 'Nunito Sans', sans-serif;
+}
+.sound-btn:hover { background: rgba(255,248,240,0.1); }
+.sound-btn.active {
+  background: rgba(212,168,118,0.15);
+  border-color: rgba(212,168,118,0.4);
+}
+.sound-icon { font-size: 1.5rem; line-height: 1; }
+.sound-name {
+  font-size: 0.67rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.65;
+}
+
+.vol-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 2px;
+}
+.vol-row span { font-size: 0.85rem; opacity: 0.45; }
+
+input[type=range] {
+  flex: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 3px;
+  background: rgba(255,248,240,0.14);
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: var(--amber);
+  cursor: pointer;
+  box-shadow: 0 0 8px rgba(212,168,118,0.45);
+}
+input[type=range]::-moz-range-thumb {
+  width: 14px; height: 14px;
+  border: none;
+  border-radius: 50%;
+  background: var(--amber);
+}
+
+/* ── Tasks ───────────────────────────────────── */
+.tasks-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.task-input-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.task-field {
+  flex: 1;
+  background: rgba(255,248,240,0.06);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--cream);
+  font-family: 'Nunito Sans', sans-serif;
+  font-size: 0.8rem;
+  padding: 8px 14px;
+  outline: none;
+  transition: border-color 0.2s ease;
+  min-width: 0;
+}
+.task-field::placeholder { color: rgba(245,239,230,0.25); }
+.task-field:focus { border-color: rgba(212,168,118,0.45); }
+
+.task-add {
+  background: var(--amber);
+  border: none;
+  color: #16100a;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.2s, transform 0.15s;
+}
+.task-add:hover { opacity: 0.82; transform: scale(1.06); }
+
+.task-list {
+  list-style: none;
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding-right: 2px;
+}
+.task-list::-webkit-scrollbar { width: 3px; }
+.task-list::-webkit-scrollbar-track { background: transparent; }
+.task-list::-webkit-scrollbar-thumb { background: rgba(255,248,240,0.12); border-radius: 2px; }
+
+.task-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  background: rgba(255,248,240,0.04);
+  border-radius: 10px;
+  animation: fadeUp 0.22s ease;
+  transition: background 0.15s;
+}
+.task-item:hover { background: rgba(255,248,240,0.07); }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.task-check {
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255,248,240,0.22);
+  background: transparent;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.62rem;
+  transition: all 0.2s ease;
+  color: #fff;
+}
+.task-check.done { background: var(--sage); border-color: var(--sage); }
+
+.task-text {
+  flex: 1;
+  font-size: 0.8rem;
+  font-weight: 300;
+  line-height: 1.4;
+  transition: all 0.22s ease;
+  word-break: break-word;
+}
+.task-text.done { text-decoration: line-through; opacity: 0.3; }
+
+.task-del {
+  background: transparent;
+  border: none;
+  color: var(--cream);
+  opacity: 0;
+  cursor: pointer;
+  font-size: 0.72rem;
+  padding: 2px 4px;
+  border-radius: 4px;
+  transition: opacity 0.15s;
+  flex-shrink: 0;
+}
+.task-item:hover .task-del { opacity: 0.35; }
+.task-del:hover { opacity: 1 !important; }
+
+/* ── Responsive ─────────────────────────────── */
+@media (max-width: 720px) {
+  html, body { overflow-y: auto; }
+  .app {
+    grid-template-columns: 1fr;
+    height: auto;
+    padding: 20px;
+    gap: 14px;
+  }
+  .time-display { font-size: 4rem; }
+  .sidebar { grid-row: 3; }
+}
+</style>
+</head>
+<body>
+
+<div id="bg"></div>
+<div id="overlay"></div>
+
+<div class="app">
+
+  <!-- Header -->
+  <header class="header">
+    <div class="logo">focus.</div>
+    <div class="mode-toggle">
+      <button class="mode-btn active" data-mode="work">Work</button>
+      <button class="mode-btn" data-mode="short">Short Break</button>
+      <button class="mode-btn" data-mode="long">Long Break</button>
+    </div>
+  </header>
+
+  <!-- Timer -->
+  <main class="timer-card">
+    <div class="ring-wrap">
+      <svg class="timer-ring" width="250" height="250" viewBox="0 0 250 250">
+        <circle class="ring-bg" cx="125" cy="125" r="108"/>
+        <circle class="ring-track" cx="125" cy="125" r="108"/>
+        <circle class="ring-progress" id="ring" cx="125" cy="125" r="108"
+                stroke-dasharray="678.6" stroke-dashoffset="0"/>
+      </svg>
+      <div class="timer-center">
+        <div class="time-display" id="timeDisplay">25:00</div>
+        <div class="mode-label" id="modeLabel">Focus Time</div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="btn-icon" id="resetBtn" title="Reset">↺</button>
+      <button class="btn-play" id="playBtn">▶</button>
+      <button class="btn-icon" id="skipBtn" title="Skip">⇥</button>
+    </div>
+
+    <div class="pips" id="pips">
+      <div class="pip"></div>
+      <div class="pip"></div>
+      <div class="pip"></div>
+      <div class="pip"></div>
+    </div>
+  </main>
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+
+    <!-- Sounds -->
+    <div class="panel">
+      <div class="panel-label">Ambient Sound</div>
+      <div class="sound-grid">
+        <button class="sound-btn" data-sound="rain">
+          <span class="sound-icon">🌧</span>
+          <span class="sound-name">Rain</span>
+        </button>
+        <button class="sound-btn" data-sound="lofi">
+          <span class="sound-icon">🎵</span>
+          <span class="sound-name">Lo-fi</span>
+        </button>
+        <button class="sound-btn" data-sound="forest">
+          <span class="sound-icon">🌿</span>
+          <span class="sound-name">Forest</span>
+        </button>
+        <button class="sound-btn" data-sound="ocean">
+          <span class="sound-icon">🌊</span>
+          <span class="sound-name">Ocean</span>
+        </button>
+      </div>
+      <div class="vol-row">
+        <span>🔈</span>
+        <input type="range" id="volSlider" min="0" max="1" step="0.01" value="0.45">
+        <span>🔊</span>
+      </div>
+    </div>
+
+    <!-- Tasks -->
+    <div class="panel tasks-panel">
+      <div class="panel-label">Tasks</div>
+      <div class="task-input-row">
+        <input class="task-field" id="taskInput" placeholder="What are you working on?" maxlength="80">
+        <button class="task-add" id="taskAddBtn">+</button>
+      </div>
+      <ul class="task-list" id="taskList"></ul>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ─────────────────────────────────────────────────
+//  TIMER ENGINE
+// ─────────────────────────────────────────────────
+const CIRC = 2 * Math.PI * 108; // 678.58…
+
+const MODES = {
+  work:  { label: 'Focus Time',   secs: 25 * 60, break: false },
+  short: { label: 'Short Break',  secs:  5 * 60, break: true  },
+  long:  { label: 'Long Break',   secs: 15 * 60, break: true  },
+};
+
+let mode      = 'work';
+let total     = MODES.work.secs;
+let remaining = total;
+let running   = false;
+let ticker    = null;
+let sessions  = 0;
+
+const timeEl   = document.getElementById('timeDisplay');
+const labelEl  = document.getElementById('modeLabel');
+const ringEl   = document.getElementById('ring');
+const playBtn  = document.getElementById('playBtn');
+const resetBtn = document.getElementById('resetBtn');
+const skipBtn  = document.getElementById('skipBtn');
+const pipsEl   = document.getElementById('pips');
+
+function fmt(s) {
+  return `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
+}
+
+function refreshRing() {
+  ringEl.style.strokeDashoffset = CIRC * (1 - remaining / total);
+}
+
+function applyMode(m) {
+  mode = m;
+  total = remaining = MODES[m].secs;
+  running = false;
+  clearInterval(ticker);
+  playBtn.textContent = '▶';
+  timeEl.textContent = fmt(remaining);
+  labelEl.textContent = MODES[m].label;
+  ringEl.style.strokeDashoffset = 0;
+
+  const isBreak = MODES[m].break;
+  ringEl.classList.toggle('is-break', isBreak);
+  playBtn.classList.toggle('is-break', isBreak);
+  labelEl.classList.toggle('is-break', isBreak);
+
+  document.querySelectorAll('.mode-btn').forEach(b => {
+    b.classList.remove('active', 'break-active');
+    if (b.dataset.mode === m) b.classList.add(isBreak ? 'break-active' : 'active');
+  });
+}
+
+function tick() {
+  remaining = Math.max(0, remaining - 1);
+  timeEl.textContent = fmt(remaining);
+  refreshRing();
+  if (remaining === 0) {
+    clearInterval(ticker);
+    running = false;
+    playBtn.textContent = '▶';
+    chime();
+    if (!MODES[mode].break) {
+      sessions = Math.min(sessions + 1, 4);
+      refreshPips(true);
+    }
+    setTimeout(() => applyMode(MODES[mode].break ? 'work' : 'short'), 1000);
+  }
+}
+
+function togglePlay() {
+  if (running) {
+    clearInterval(ticker);
+    running = false;
+    playBtn.textContent = '▶';
+  } else {
+    ticker = setInterval(tick, 1000);
+    running = true;
+    playBtn.textContent = '⏸';
+  }
+}
+
+function refreshPips(bounce = false) {
+  const pips = pipsEl.querySelectorAll('.pip');
+  pips.forEach((p, i) => {
+    const done = i < sessions;
+    p.classList.toggle('done', done);
+    if (done && bounce && i === sessions - 1) {
+      p.classList.remove('bounce');
+      void p.offsetWidth;
+      p.classList.add('bounce');
+    }
+  });
+}
+
+function chime() {
+  try {
+    const ctx = getCtx();
+    const freqs = [523.25, 659.25, 783.99];
+    freqs.forEach((f, i) => {
+      const osc = ctx.createOscillator();
+      const g = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = f;
+      g.gain.setValueAtTime(0, ctx.currentTime + i * 0.18);
+      g.gain.linearRampToValueAtTime(0.12, ctx.currentTime + i * 0.18 + 0.05);
+      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.18 + 0.7);
+      osc.connect(g); g.connect(ctx.destination);
+      osc.start(ctx.currentTime + i * 0.18);
+      osc.stop(ctx.currentTime + i * 0.18 + 0.8);
+    });
+  } catch(e) {}
+}
+
+playBtn.addEventListener('click', togglePlay);
+resetBtn.addEventListener('click', () => applyMode(mode));
+skipBtn.addEventListener('click', () => {
+  clearInterval(ticker);
+  running = false;
+  if (!MODES[mode].break) { sessions = Math.min(sessions + 1, 4); refreshPips(true); }
+  applyMode(MODES[mode].break ? 'work' : 'short');
+});
+document.querySelectorAll('.mode-btn').forEach(b => {
+  b.addEventListener('click', () => applyMode(b.dataset.mode));
+});
+
+applyMode('work');
+
+// ─────────────────────────────────────────────────
+//  WEB AUDIO AMBIENT ENGINE
+// ─────────────────────────────────────────────────
+let audioCtx   = null;
+let masterGain = null;
+let activeNodes = [];
+let currentSound = null;
+
+function getCtx() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    masterGain = audioCtx.createGain();
+    masterGain.gain.value = parseFloat(document.getElementById('volSlider').value);
+    masterGain.connect(audioCtx.destination);
+  }
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+
+function makeNoiseBuffer(ctx, type = 'white') {
+  const len = ctx.sampleRate * 4;
+  const buf = ctx.createBuffer(1, len, ctx.sampleRate);
+  const d   = buf.getChannelData(0);
+  if (type === 'white') {
+    for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+  } else { // pink
+    let b0=0,b1=0,b2=0,b3=0,b4=0,b5=0,b6=0;
+    for (let i = 0; i < len; i++) {
+      const w = Math.random() * 2 - 1;
+      b0=0.99886*b0+w*0.0555179; b1=0.99332*b1+w*0.0750759;
+      b2=0.969*b2+w*0.153852;    b3=0.8665*b3+w*0.3104856;
+      b4=0.55*b4+w*0.5329522;    b5=-0.7616*b5-w*0.016898;
+      d[i] = (b0+b1+b2+b3+b4+b5+b6+w*0.5362)*0.11;
+      b6 = w*0.115926;
+    }
+  }
+  return buf;
+}
+
+function noiseSource(ctx, type) {
+  const src = ctx.createBufferSource();
+  src.buffer = makeNoiseBuffer(ctx, type);
+  src.loop = true;
+  return src;
+}
+
+function stopAll() {
+  activeNodes.forEach(n => {
+    try {
+      n.gain.gain.setTargetAtTime(0, audioCtx.currentTime, 0.25);
+      setTimeout(() => { try { n.src?.stop(); } catch(e){} }, 600);
+    } catch(e){}
+  });
+  activeNodes = [];
+  currentSound = null;
+}
+
+function reg(src, gainNode) {
+  activeNodes.push({ src, gain: gainNode });
+}
+
+// Rain
+function startRain(ctx) {
+  const g   = ctx.createGain(); g.gain.value = 0; g.connect(masterGain);
+  const lpf = ctx.createBiquadFilter(); lpf.type = 'lowpass';  lpf.frequency.value = 1600; lpf.Q.value = 0.4;
+  const hpf = ctx.createBiquadFilter(); hpf.type = 'highpass'; hpf.frequency.value = 320;
+  const src = noiseSource(ctx, 'white');
+  src.connect(hpf); hpf.connect(lpf); lpf.connect(g);
+  src.start(); g.gain.setTargetAtTime(0.85, ctx.currentTime, 0.9); reg(src, g);
+
+  // gentle drips
+  (function drip() {
+    if (!activeNodes.length) return;
+    const o = ctx.createOscillator(), dg = ctx.createGain();
+    o.type = 'sine'; o.frequency.value = 700 + Math.random()*500;
+    dg.gain.setValueAtTime(0.06, ctx.currentTime);
+    dg.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+0.14);
+    o.connect(dg); dg.connect(masterGain);
+    o.start(); o.stop(ctx.currentTime+0.15);
+    setTimeout(drip, 180 + Math.random()*1100);
+  })();
+}
+
+// Lo-fi
+function startLofi(ctx) {
+  // Vinyl hiss
+  const hs  = noiseSource(ctx, 'white');
+  const hg  = ctx.createGain(); hg.gain.value = 0;
+  const hpf = ctx.createBiquadFilter(); hpf.type = 'highpass'; hpf.frequency.value = 5000;
+  hs.connect(hpf); hpf.connect(hg); hg.connect(masterGain);
+  hs.start(); hg.gain.setTargetAtTime(0.025, ctx.currentTime, 0.4); reg(hs, hg);
+
+  // Chord progression (Cmaj7 – Am7 – Fmaj7 – G7)
+  const chords = [
+    [130.8, 164.8, 196.0, 246.9],
+    [110.0, 130.8, 164.8, 196.0],
+    [87.31, 110.0, 130.8, 164.8],
+    [98.00, 123.5, 146.8, 185.0],
+  ];
+  let ci = 0;
+  const sentinel = { src: null, gain: { gain: { setTargetAtTime: ()=>{} } } };
+  activeNodes.push(sentinel);
+
+  (function chord() {
+    if (!activeNodes.includes(sentinel)) return;
+    chords[ci % chords.length].forEach(f => {
+      const o = ctx.createOscillator(), eg = ctx.createGain();
+      const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 900;
+      o.type = 'triangle'; o.frequency.value = f;
+      eg.gain.setValueAtTime(0, ctx.currentTime);
+      eg.gain.linearRampToValueAtTime(0.055, ctx.currentTime+0.35);
+      eg.gain.setValueAtTime(0.055, ctx.currentTime+1.4);
+      eg.gain.linearRampToValueAtTime(0, ctx.currentTime+2.8);
+      o.connect(lp); lp.connect(eg); eg.connect(masterGain);
+      o.start(); o.stop(ctx.currentTime+2.9);
+    });
+    ci++;
+    setTimeout(chord, 3000);
+  })();
+}
+
+// Forest
+function startForest(ctx) {
+  const ws  = noiseSource(ctx, 'pink');
+  const wg  = ctx.createGain(); wg.gain.value = 0;
+  const lpf = ctx.createBiquadFilter(); lpf.type = 'lowpass'; lpf.frequency.value = 500;
+  ws.connect(lpf); lpf.connect(wg); wg.connect(masterGain);
+  ws.start(); wg.gain.setTargetAtTime(0.38, ctx.currentTime, 1); reg(ws, wg);
+
+  (function bird() {
+    if (!activeNodes.length) return;
+    const n = 2 + Math.floor(Math.random()*3);
+    for (let i = 0; i < n; i++) {
+      setTimeout(() => {
+        const o = ctx.createOscillator(), bg = ctx.createGain();
+        const fr = 1600 + Math.random()*1400;
+        o.type = 'sine';
+        o.frequency.setValueAtTime(fr, ctx.currentTime);
+        o.frequency.linearRampToValueAtTime(fr*1.25, ctx.currentTime+0.09);
+        o.frequency.linearRampToValueAtTime(fr, ctx.currentTime+0.18);
+        bg.gain.setValueAtTime(0, ctx.currentTime);
+        bg.gain.linearRampToValueAtTime(0.045, ctx.currentTime+0.02);
+        bg.gain.linearRampToValueAtTime(0, ctx.currentTime+0.2);
+        o.connect(bg); bg.connect(masterGain);
+        o.start(); o.stop(ctx.currentTime+0.22);
+      }, i*160);
+    }
+    setTimeout(bird, 1800 + Math.random()*3800);
+  })();
+}
+
+// Ocean
+function startOcean(ctx) {
+  const src = noiseSource(ctx, 'pink');
+  const g   = ctx.createGain(); g.gain.value = 0;
+  const lpf = ctx.createBiquadFilter(); lpf.type = 'lowpass'; lpf.frequency.value = 800;
+  src.connect(lpf); lpf.connect(g); g.connect(masterGain);
+  src.start(); reg(src, g);
+  let ph = 0;
+
+  (function wave() {
+    if (!activeNodes.find(n => n.src === src)) return;
+    const t = ctx.currentTime, dur = 3.2 + Math.random()*1.2;
+    g.gain.cancelScheduledValues(t);
+    if (ph % 2 === 0) {
+      g.gain.setValueAtTime(0.08, t);
+      g.gain.linearRampToValueAtTime(0.62, t + dur*0.38);
+      g.gain.linearRampToValueAtTime(0.1,  t + dur);
+    } else {
+      g.gain.setValueAtTime(0.1, t);
+      g.gain.linearRampToValueAtTime(0.04, t + dur);
+    }
+    ph++;
+    setTimeout(wave, dur*1000);
+  })();
+}
+
+const soundMap = { rain: startRain, lofi: startLofi, forest: startForest, ocean: startOcean };
+
+document.querySelectorAll('.sound-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const s = btn.dataset.sound;
+    if (currentSound === s) {
+      stopAll();
+      document.querySelectorAll('.sound-btn').forEach(b => b.classList.remove('active'));
+      return;
+    }
+    stopAll();
+    document.querySelectorAll('.sound-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentSound = s;
+    soundMap[s](getCtx());
+  });
+});
+
+document.getElementById('volSlider').addEventListener('input', e => {
+  if (masterGain) masterGain.gain.value = parseFloat(e.target.value);
+});
+
+// ─────────────────────────────────────────────────
+//  TASK LIST
+// ─────────────────────────────────────────────────
+let tasks = [];
+const taskInput  = document.getElementById('taskInput');
+const taskAddBtn = document.getElementById('taskAddBtn');
+const taskList   = document.getElementById('taskList');
+
+function renderTasks() {
+  taskList.innerHTML = '';
+  tasks.forEach((t, i) => {
+    const li = document.createElement('li');
+    li.className = 'task-item';
+    li.innerHTML = `
+      <button class="task-check${t.done?' done':''}" data-i="${i}">${t.done?'✓':''}</button>
+      <span class="task-text${t.done?' done':''}">${escHtml(t.text)}</span>
+      <button class="task-del" data-i="${i}" title="Remove">✕</button>
+    `;
+    taskList.appendChild(li);
+  });
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function addTask() {
+  const v = taskInput.value.trim();
+  if (!v) return;
+  tasks.push({ text: v, done: false });
+  taskInput.value = '';
+  renderTasks();
+}
+
+taskAddBtn.addEventListener('click', addTask);
+taskInput.addEventListener('keydown', e => { if (e.key === 'Enter') addTask(); });
+
+taskList.addEventListener('click', e => {
+  const i = parseInt(e.target.dataset.i);
+  if (isNaN(i)) return;
+  if (e.target.classList.contains('task-check')) {
+    tasks[i].done = !tasks[i].done;
+    renderTasks();
+  } else if (e.target.classList.contains('task-del')) {
+    tasks.splice(i, 1);
+    renderTasks();
+  }
+});
+</script>
+</body>
+</html>
