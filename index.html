@@ -17,29 +17,27 @@
   --shadow: 0 12px 56px rgba(0,0,0,0.45);
 }
 
-html, body {
-  height: 100%;
-  font-family: 'Nunito Sans', sans-serif;
-  color: var(--cream);
-  overflow: hidden;
-}
+html, body { height: 100%; font-family: 'Nunito Sans', sans-serif; color: var(--cream); overflow: hidden; }
 
-/* ── Background ─────────────────────────────── */
 #bg {
   position: fixed; inset: 0; z-index: -2;
   background-image: url('https://images.unsplash.com/photo-1448375240586-882707db888b?w=1920&q=80');
-  background-size: cover;
-  background-position: center 40%;
-  filter: brightness(0.62) saturate(0.85);
-  transform: scale(1.04);
+  background-size: cover; background-position: center 40%;
+  filter: brightness(0.62) saturate(0.85); transform: scale(1.04);
   transition: filter 1.8s ease;
 }
 #overlay {
   position: fixed; inset: 0; z-index: -1;
   background: linear-gradient(160deg, rgba(6,5,3,0.52) 0%, rgba(18,12,6,0.28) 60%, rgba(4,10,8,0.48) 100%);
+  transition: background 1.8s ease;
 }
 
-/* ── Layout ─────────────────────────────────── */
+body.mode-work  { --primary-accent: #d4a876; --primary-text: #f5efe6; }
+body.mode-break { --primary-accent: #8aab7e; --primary-text: #e8f3e8; }
+body.mode-break #bg    { filter: brightness(0.55) saturate(1.1) hue-rotate(45deg); }
+body.mode-break #overlay { background: linear-gradient(160deg,rgba(20,30,15,.48) 0%,rgba(30,45,20,.32) 60%,rgba(15,25,18,.52) 100%); }
+
+/* ── Layout ───────────────────────────────────── */
 .app {
   height: 100vh;
   display: grid;
@@ -51,445 +49,405 @@ html, body {
   margin: 0 auto;
 }
 
-/* ── Header ─────────────────────────────────── */
+/* ── Header ───────────────────────────────────── */
 .header {
   grid-column: 1 / -1;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  display: flex; align-items: center; justify-content: space-between;
 }
-
 .logo {
-  font-family: 'Cormorant Garamond', serif;
-  font-style: italic;
-  font-weight: 300;
-  font-size: 1.45rem;
-  letter-spacing: 0.14em;
-  color: var(--amber);
-  opacity: 0.88;
+  font-family: 'Cormorant Garamond', serif; font-style: italic;
+  font-weight: 300; font-size: 1.45rem; letter-spacing: .14em;
+  color: var(--primary-accent); opacity: .88; transition: color 1.2s ease;
 }
+.header-right { display: flex; align-items: center; gap: 10px; }
+
+.sounds-btn {
+  background: rgba(0,0,0,.25); border: 1px solid var(--border);
+  color: var(--cream); font-family: 'Nunito Sans', sans-serif;
+  font-size: .7rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase;
+  padding: 7px 16px; border-radius: 50px; cursor: pointer;
+  backdrop-filter: blur(16px); display: flex; align-items: center; gap: 6px;
+  transition: background .2s ease;
+}
+.sounds-btn:hover { background: rgba(0,0,0,.4); }
+.sounds-badge {
+  background: var(--amber); color: #16100a;
+  border-radius: 10px; padding: 1px 7px;
+  font-size: .65rem; display: none;
+}
+.sounds-badge.visible { display: inline-block; }
 
 .mode-toggle {
-  display: flex;
-  gap: 3px;
-  background: rgba(0,0,0,0.25);
-  border: 1px solid var(--border);
-  border-radius: 50px;
-  padding: 4px;
-  backdrop-filter: blur(16px);
+  display: flex; gap: 3px;
+  background: rgba(0,0,0,.25); border: 1px solid var(--border);
+  border-radius: 50px; padding: 4px; backdrop-filter: blur(16px);
 }
-
 .mode-btn {
-  background: transparent;
-  border: none;
-  color: var(--cream);
-  font-family: 'Nunito Sans', sans-serif;
-  font-size: 0.7rem;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  padding: 6px 16px;
-  border-radius: 50px;
-  cursor: pointer;
-  opacity: 0.45;
-  transition: all 0.3s ease;
-  white-space: nowrap;
+  background: transparent; border: none; color: var(--cream);
+  font-family: 'Nunito Sans', sans-serif; font-size: .7rem; font-weight: 600;
+  letter-spacing: .1em; text-transform: uppercase; padding: 6px 16px;
+  border-radius: 50px; cursor: pointer; opacity: .45;
+  transition: all .3s ease; white-space: nowrap;
 }
-.mode-btn.active { background: var(--amber); color: #1a1008; opacity: 1; }
-.mode-btn.break-active { background: var(--sage); color: #0d1a0d; opacity: 1; }
+.mode-btn.active       { background: #d4a876; color: #1a1008; opacity: 1; }
+.mode-btn.break-active { background: #8aab7e; color: #0d1a0d; opacity: 1; }
 
-/* ── Timer Card ─────────────────────────────── */
+/* ── Timer Card ───────────────────────────────── */
 .timer-card {
-  background: var(--glass);
-  border: 1px solid var(--border);
-  border-radius: 28px;
-  backdrop-filter: blur(28px);
-  -webkit-backdrop-filter: blur(28px);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 30px;
-  padding: 48px 40px;
-  box-shadow: var(--shadow);
-  position: relative;
-  overflow: hidden;
+  background: var(--glass); border: 1px solid var(--border); border-radius: 28px;
+  backdrop-filter: blur(28px); -webkit-backdrop-filter: blur(28px);
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 30px; padding: 48px 40px;
+  box-shadow: var(--shadow); position: relative; overflow: hidden;
 }
-
-/* subtle inner glow */
 .timer-card::before {
-  content: '';
-  position: absolute;
-  inset: -1px;
-  border-radius: 28px;
-  background: radial-gradient(ellipse 60% 40% at 50% 0%, rgba(212,168,118,0.07), transparent 70%);
-  pointer-events: none;
+  content: ''; position: absolute; inset: -1px; border-radius: 28px;
+  background: radial-gradient(ellipse 60% 40% at 50% 0%,rgba(212,168,118,.07),transparent 70%);
+  pointer-events: none; transition: background 1.8s ease;
 }
+body.mode-break .timer-card::before { background: radial-gradient(ellipse 60% 40% at 50% 0%,rgba(138,171,126,.12),transparent 70%); }
 
-/* ── SVG Ring ───────────────────────────────── */
-.ring-wrap {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
+.ring-wrap { position: relative; display: flex; align-items: center; justify-content: center; }
 .timer-ring { transform: rotate(-90deg); }
-
-.ring-bg {
-  fill: none;
-  stroke: rgba(255,248,240,0.07);
-  stroke-width: 2.5;
-}
-
-.ring-track {
-  fill: none;
-  stroke: rgba(255,248,240,0.04);
-  stroke-width: 2.5;
-  stroke-dasharray: 6 6;
-}
-
+.ring-bg    { fill: none; stroke: rgba(255,248,240,.07); stroke-width: 2.5; }
+.ring-track { fill: none; stroke: rgba(255,248,240,.04); stroke-width: 2.5; stroke-dasharray: 6 6; }
 .ring-progress {
-  fill: none;
-  stroke: var(--amber);
-  stroke-width: 2.5;
-  stroke-linecap: round;
-  stroke-dasharray: 678.6;
-  stroke-dashoffset: 0;
-  transition: stroke-dashoffset 1s linear, stroke 0.6s ease;
-  filter: drop-shadow(0 0 10px rgba(212,168,118,0.55));
+  fill: none; stroke: var(--primary-accent); stroke-width: 2.5; stroke-linecap: round;
+  stroke-dasharray: 678.6; stroke-dashoffset: 0;
+  transition: stroke-dashoffset 1s linear, stroke .6s ease;
+  filter: drop-shadow(0 0 10px rgba(212,168,118,.55));
 }
-.ring-progress.is-break {
-  stroke: var(--sage);
-  filter: drop-shadow(0 0 10px rgba(138,171,126,0.55));
-}
-
-.timer-center {
-  position: absolute;
-  text-align: center;
-  user-select: none;
-}
-
+.ring-progress.is-break { stroke: #8aab7e; filter: drop-shadow(0 0 10px rgba(138,171,126,.55)); }
+.timer-center { position: absolute; text-align: center; user-select: none; }
 .time-display {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 5rem;
-  font-weight: 300;
-  letter-spacing: -0.03em;
-  line-height: 1;
-  color: var(--cream);
+  font-family: 'Cormorant Garamond', serif; font-size: 5rem;
+  font-weight: 300; letter-spacing: -.03em; line-height: 1;
+  color: var(--primary-text); transition: color 1.2s ease;
 }
-
 .mode-label {
-  margin-top: 8px;
-  font-size: 0.62rem;
-  font-weight: 600;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--amber);
-  opacity: 0.65;
-  transition: color 0.5s ease;
+  margin-top: 8px; font-size: .62rem; font-weight: 600;
+  letter-spacing: .22em; text-transform: uppercase;
+  color: var(--primary-accent); opacity: .65; transition: color 1.2s ease;
 }
-.mode-label.is-break { color: var(--sage); }
+.mode-label.is-break { color: #8aab7e; }
 
-/* ── Controls ───────────────────────────────── */
-.controls {
-  display: flex;
-  align-items: center;
-  gap: 18px;
-}
-
+.controls { display: flex; align-items: center; gap: 18px; }
 .btn-icon {
-  background: transparent;
-  border: 1px solid var(--border);
-  color: var(--cream);
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0.55;
-  transition: all 0.2s ease;
-  font-size: 1rem;
+  background: transparent; border: 1px solid var(--border); color: var(--cream);
+  width: 42px; height: 42px; border-radius: 50%; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  opacity: .55; transition: all .2s ease; font-size: 1rem;
 }
-.btn-icon:hover { opacity: 1; border-color: rgba(255,248,240,0.4); }
-
+.btn-icon:hover { opacity: 1; border-color: rgba(255,248,240,.4); }
 .btn-play {
-  background: var(--amber);
-  border: none;
-  color: #16100a;
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.35rem;
-  box-shadow: 0 4px 24px rgba(212,168,118,0.38), 0 0 0 0 rgba(212,168,118,0);
-  transition: all 0.22s ease;
+  background: var(--primary-accent); border: none; color: #16100a;
+  width: 64px; height: 64px; border-radius: 50%; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; font-size: 1.35rem;
+  box-shadow: 0 4px 24px rgba(212,168,118,.38); transition: all .22s ease, background 1.2s ease;
 }
-.btn-play:hover {
-  transform: scale(1.08);
-  box-shadow: 0 8px 32px rgba(212,168,118,0.52);
-}
-.btn-play.is-break {
-  background: var(--sage);
-  box-shadow: 0 4px 24px rgba(138,171,126,0.38);
-}
-.btn-play.is-break:hover {
-  box-shadow: 0 8px 32px rgba(138,171,126,0.52);
-}
+.btn-play:hover { transform: scale(1.08); box-shadow: 0 8px 32px rgba(212,168,118,.52); }
+.btn-play.is-break { background: #8aab7e; box-shadow: 0 4px 24px rgba(138,171,126,.38); }
+.btn-play.is-break:hover { box-shadow: 0 8px 32px rgba(138,171,126,.52); }
 
-/* ── Session Pips ───────────────────────────── */
-.pips {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.pip {
-  width: 7px; height: 7px;
-  border-radius: 50%;
-  background: rgba(255,248,240,0.12);
-  transition: background 0.4s ease, transform 0.3s ease;
-}
-.pip.done { background: var(--amber); }
-.pip.done.bounce { animation: pipBounce 0.35s ease; }
+.pips { display: flex; align-items: center; gap: 10px; }
+.pip { width: 7px; height: 7px; border-radius: 50%; background: rgba(255,248,240,.12); transition: background .4s ease, transform .3s ease; }
+.pip.done { background: var(--primary-accent); }
+.pip.done.bounce { animation: pipBounce .35s ease; }
+@keyframes pipBounce { 0%{transform:scale(1)} 50%{transform:scale(1.5)} 100%{transform:scale(1)} }
 
-@keyframes pipBounce {
-  0%   { transform: scale(1); }
-  50%  { transform: scale(1.5); }
-  100% { transform: scale(1); }
-}
-
-/* ── Sidebar ─────────────────────────────────── */
-.sidebar {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  min-height: 0;
-}
-
-/* ── Panel base ─────────────────────────────── */
+/* ── Sidebar ──────────────────────────────────── */
+.sidebar { display: flex; flex-direction: column; gap: 14px; min-height: 0; }
 .panel {
-  background: var(--glass);
-  border: 1px solid var(--border);
-  border-radius: 22px;
-  backdrop-filter: blur(28px);
-  -webkit-backdrop-filter: blur(28px);
-  padding: 24px 22px;
-  box-shadow: var(--shadow);
+  background: var(--glass); border: 1px solid var(--border); border-radius: 22px;
+  backdrop-filter: blur(28px); -webkit-backdrop-filter: blur(28px);
+  padding: 24px 22px; box-shadow: var(--shadow);
 }
-
 .panel-label {
-  font-size: 0.62rem;
-  font-weight: 600;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--cream);
-  opacity: 0.35;
-  margin-bottom: 18px;
+  font-size: .62rem; font-weight: 600; letter-spacing: .22em;
+  text-transform: uppercase; color: var(--cream); opacity: .35; margin-bottom: 18px;
 }
-
-/* ── Sound Grid ─────────────────────────────── */
-.sound-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  margin-bottom: 18px;
-}
-
-.sound-btn {
-  background: rgba(255,248,240,0.05);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  color: var(--cream);
-  padding: 14px 8px 12px;
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 5px;
-  transition: all 0.22s ease;
-  font-family: 'Nunito Sans', sans-serif;
-}
-.sound-btn:hover { background: rgba(255,248,240,0.1); }
-.sound-btn.active {
-  background: rgba(212,168,118,0.15);
-  border-color: rgba(212,168,118,0.4);
-}
-.sound-icon { font-size: 1.5rem; line-height: 1; }
-.sound-name {
-  font-size: 0.67rem;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  opacity: 0.65;
-}
-
-.vol-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 0 2px;
-}
-.vol-row span { font-size: 0.85rem; opacity: 0.45; }
-
-input[type=range] {
-  flex: 1;
-  -webkit-appearance: none;
-  appearance: none;
-  height: 3px;
-  background: rgba(255,248,240,0.14);
-  border-radius: 2px;
-  outline: none;
-  cursor: pointer;
-}
-input[type=range]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  width: 14px; height: 14px;
-  border-radius: 50%;
-  background: var(--amber);
-  cursor: pointer;
-  box-shadow: 0 0 8px rgba(212,168,118,0.45);
-}
-input[type=range]::-moz-range-thumb {
-  width: 14px; height: 14px;
-  border: none;
-  border-radius: 50%;
-  background: var(--amber);
-}
-
-/* ── Tasks ───────────────────────────────────── */
-.tasks-panel {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-}
-
-.task-input-row {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 14px;
-}
-
+.tasks-panel { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+.task-input-row { display: flex; gap: 8px; margin-bottom: 14px; }
 .task-field {
-  flex: 1;
-  background: rgba(255,248,240,0.06);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  color: var(--cream);
-  font-family: 'Nunito Sans', sans-serif;
-  font-size: 0.8rem;
-  padding: 8px 14px;
-  outline: none;
-  transition: border-color 0.2s ease;
-  min-width: 0;
+  flex: 1; background: rgba(255,248,240,.06); border: 1px solid var(--border);
+  border-radius: 10px; color: var(--cream); font-family: 'Nunito Sans', sans-serif;
+  font-size: .8rem; padding: 8px 14px; outline: none; transition: border-color .2s ease; min-width: 0;
 }
-.task-field::placeholder { color: rgba(245,239,230,0.25); }
-.task-field:focus { border-color: rgba(212,168,118,0.45); }
-
+.task-field::placeholder { color: rgba(245,239,230,.25); }
+.task-field:focus { border-color: rgba(212,168,118,.45); }
 .task-add {
-  background: var(--amber);
-  border: none;
-  color: #16100a;
-  width: 34px;
-  height: 34px;
-  flex-shrink: 0;
-  border-radius: 10px;
-  cursor: pointer;
-  font-size: 1.2rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: opacity 0.2s, transform 0.15s;
+  background: var(--amber); border: none; color: #16100a;
+  width: 34px; height: 34px; flex-shrink: 0; border-radius: 10px;
+  cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center;
+  transition: opacity .2s, transform .15s;
 }
-.task-add:hover { opacity: 0.82; transform: scale(1.06); }
-
+.task-add:hover { opacity: .82; transform: scale(1.06); }
 .task-list {
-  list-style: none;
-  overflow-y: auto;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  padding-right: 2px;
+  list-style: none; overflow-y: auto; flex: 1;
+  display: flex; flex-direction: column; gap: 5px; padding-right: 2px;
 }
 .task-list::-webkit-scrollbar { width: 3px; }
 .task-list::-webkit-scrollbar-track { background: transparent; }
-.task-list::-webkit-scrollbar-thumb { background: rgba(255,248,240,0.12); border-radius: 2px; }
-
+.task-list::-webkit-scrollbar-thumb { background: rgba(255,248,240,.12); border-radius: 2px; }
 .task-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 9px 12px;
-  background: rgba(255,248,240,0.04);
-  border-radius: 10px;
-  animation: fadeUp 0.22s ease;
-  transition: background 0.15s;
+  display: flex; align-items: center; gap: 10px; padding: 9px 12px;
+  background: rgba(255,248,240,.04); border-radius: 10px;
+  animation: fadeUp .22s ease; transition: background .15s;
 }
-.task-item:hover { background: rgba(255,248,240,0.07); }
-
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(-6px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
+.task-item:hover { background: rgba(255,248,240,.07); }
+@keyframes fadeUp { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} }
 .task-check {
-  width: 18px; height: 18px;
-  border-radius: 50%;
-  border: 1.5px solid rgba(255,248,240,0.22);
-  background: transparent;
-  cursor: pointer;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.62rem;
-  transition: all 0.2s ease;
-  color: #fff;
+  width: 18px; height: 18px; border-radius: 50%;
+  border: 1.5px solid rgba(255,248,240,.22); background: transparent;
+  cursor: pointer; flex-shrink: 0; display: flex; align-items: center;
+  justify-content: center; font-size: .62rem; transition: all .2s ease; color: #fff;
 }
 .task-check.done { background: var(--sage); border-color: var(--sage); }
-
-.task-text {
-  flex: 1;
-  font-size: 0.8rem;
-  font-weight: 300;
-  line-height: 1.4;
-  transition: all 0.22s ease;
-  word-break: break-word;
-}
-.task-text.done { text-decoration: line-through; opacity: 0.3; }
-
+.task-text { flex: 1; font-size: .8rem; font-weight: 300; line-height: 1.4; transition: all .22s ease; word-break: break-word; }
+.task-text.done { text-decoration: line-through; opacity: .3; }
 .task-del {
-  background: transparent;
-  border: none;
-  color: var(--cream);
-  opacity: 0;
-  cursor: pointer;
-  font-size: 0.72rem;
-  padding: 2px 4px;
-  border-radius: 4px;
-  transition: opacity 0.15s;
-  flex-shrink: 0;
+  background: transparent; border: none; color: var(--cream);
+  opacity: 0; cursor: pointer; font-size: .72rem;
+  padding: 2px 4px; border-radius: 4px; transition: opacity .15s; flex-shrink: 0;
 }
-.task-item:hover .task-del { opacity: 0.35; }
+.task-item:hover .task-del { opacity: .35; }
 .task-del:hover { opacity: 1 !important; }
 
-/* ── Responsive ─────────────────────────────── */
+/* ── global range base (dark mode) ───────────── */
+input[type=range] {
+  -webkit-appearance: none; appearance: none;
+  height: 3px; background: rgba(255,248,240,.14);
+  border-radius: 2px; outline: none; cursor: pointer;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 14px; height: 14px;
+  border-radius: 50%; background: var(--amber); cursor: pointer;
+  box-shadow: 0 0 8px rgba(212,168,118,.45);
+}
+input[type=range]::-moz-range-thumb { width:14px;height:14px;border:none;border-radius:50%;background:var(--amber); }
+
+/* ════════════════════════════════════════════════
+   SOUND MODAL  (light mode)
+   ════════════════════════════════════════════════ */
+.sound-modal {
+  position: fixed; inset: 0; z-index: 1000;
+  display: flex; align-items: center; justify-content: center;
+}
+.sound-modal.hidden { display: none; }
+.sm-backdrop {
+  position: absolute; inset: 0;
+  background: rgba(0,0,0,.55); backdrop-filter: blur(6px);
+}
+.sm-dialog {
+  position: relative; z-index: 1;
+  width: min(980px, 96vw); max-height: 88vh;
+  background: #f7f5f2; border-radius: 24px;
+  overflow: hidden; display: flex; flex-direction: column;
+  box-shadow: 0 32px 96px rgba(0,0,0,.5);
+}
+
+/* ── Modal Header ─────────────────────────────── */
+.sm-header {
+  display: flex; align-items: center; gap: 16px;
+  padding: 18px 24px 16px;
+  border-bottom: 1px solid #e8e0d6; background: #fff; flex-shrink: 0;
+}
+.sm-title {
+  font-family: 'Cormorant Garamond', serif; font-style: italic;
+  font-size: 1.25rem; font-weight: 300; color: #2d2419; flex: 1;
+}
+.sm-master-row {
+  display: flex; align-items: center; gap: 8px;
+}
+.sm-master-row span { font-size: .8rem; color: #8a7a6a; }
+.sm-master-vol { width: 110px; }
+.sm-close {
+  background: none; border: none; cursor: pointer;
+  color: #8a7a6a; font-size: 1rem; padding: 6px 8px;
+  border-radius: 8px; transition: background .15s, color .15s; line-height: 1;
+}
+.sm-close:hover { background: #f0ebe3; color: #2d2419; }
+
+/* ── Modal Body ───────────────────────────────── */
+.sm-body {
+  display: grid;
+  grid-template-columns: 168px 1fr 240px;
+  flex: 1; min-height: 0; overflow: hidden;
+}
+
+/* ── Tabs ─────────────────────────────────────── */
+.sm-tabs {
+  border-right: 1px solid #e8e0d6;
+  overflow-y: auto; padding: 10px 8px;
+  background: #faf8f5; display: flex; flex-direction: column; gap: 2px;
+}
+.sm-tabs::-webkit-scrollbar { width: 3px; }
+.sm-tabs::-webkit-scrollbar-thumb { background: #d8d0c8; border-radius: 2px; }
+.sm-tab {
+  display: block; width: 100%; padding: 9px 14px;
+  border: none; background: transparent; text-align: left; cursor: pointer;
+  border-radius: 8px; font-family: 'Nunito Sans', sans-serif;
+  font-size: .8rem; font-weight: 600; color: #6b5a4a;
+  transition: background .15s, color .15s;
+}
+.sm-tab:hover { background: #ede5da; }
+.sm-tab.active { background: #fdf0df; color: #8b5e1a; }
+
+/* ── Sound Grid ───────────────────────────────── */
+.sm-grid {
+  padding: 16px; overflow-y: auto; background: #f7f5f2;
+}
+.sm-grid::-webkit-scrollbar { width: 4px; }
+.sm-grid::-webkit-scrollbar-thumb { background: #d8d0c8; border-radius: 2px; }
+.sm-panel { display: none; }
+.sm-panel.active {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px; align-content: start;
+}
+
+/* ── Sound Card ───────────────────────────────── */
+.sound-card {
+  background: #fff; border: 1.5px solid #e8e0d6; border-radius: 14px;
+  padding: 13px 12px 11px; cursor: pointer;
+  transition: border-color .18s, box-shadow .18s, background .18s;
+  user-select: none;
+}
+.sound-card:hover { border-color: #d4a876; box-shadow: 0 2px 14px rgba(212,168,118,.15); }
+.sound-card.active { background: #fff8ee; border-color: #d4a876; box-shadow: 0 2px 18px rgba(212,168,118,.22); }
+.sc-top { display: flex; align-items: center; gap: 7px; margin-bottom: 9px; }
+.sc-icon { font-size: 1.3rem; line-height: 1; flex-shrink: 0; }
+.sc-name { font-size: .74rem; font-weight: 600; color: #2d2419; flex: 1; line-height: 1.25; }
+.sc-toggle {
+  width: 30px; height: 17px; border-radius: 9px;
+  background: #d0c8be; border: none; cursor: pointer;
+  position: relative; flex-shrink: 0; transition: background .2s;
+}
+.sc-toggle::after {
+  content: ''; position: absolute;
+  width: 13px; height: 13px; background: #fff; border-radius: 50%;
+  top: 2px; left: 2px; transition: transform .2s; box-shadow: 0 1px 3px rgba(0,0,0,.2);
+}
+.sound-card.active .sc-toggle { background: #d4a876; }
+.sound-card.active .sc-toggle::after { transform: translateX(13px); }
+
+.sc-vol {
+  width: 100%; height: 3px; -webkit-appearance: none; appearance: none;
+  background: #e8e0d6; border-radius: 2px; cursor: pointer; outline: none;
+  opacity: 0; transition: opacity .2s; pointer-events: none;
+}
+.sound-card.active .sc-vol { opacity: 1; pointer-events: auto; }
+.sc-vol::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 13px; height: 13px;
+  border-radius: 50%; background: #d4a876; cursor: pointer;
+  box-shadow: 0 0 5px rgba(212,168,118,.4);
+}
+.sc-vol::-moz-range-thumb { width:13px;height:13px;border:none;border-radius:50%;background:#d4a876; }
+
+/* ── Mix Panel ────────────────────────────────── */
+.sm-mix {
+  border-left: 1px solid #e8e0d6;
+  display: flex; flex-direction: column; gap: 0;
+  background: #faf8f5; overflow: hidden;
+}
+.sm-mix-section {
+  padding: 14px 16px;
+  border-bottom: 1px solid #e8e0d6;
+}
+.sm-mix-section:last-child { border-bottom: none; flex: 1; overflow-y: auto; }
+.sm-mix-section::-webkit-scrollbar { width: 3px; }
+.sm-mix-section::-webkit-scrollbar-thumb { background: #d8d0c8; border-radius: 2px; }
+.sm-section-label {
+  font-size: .6rem; font-weight: 600; letter-spacing: .2em;
+  text-transform: uppercase; color: #9a8878; margin-bottom: 10px;
+}
+
+/* master vol in mix */
+.mix-master-row { display: flex; align-items: center; gap: 8px; }
+.mix-master-row span { font-size: .8rem; color: #6b5a4a; }
+.mix-master-range {
+  flex: 1; height: 3px; -webkit-appearance: none; appearance: none;
+  background: #e8e0d6; border-radius: 2px; cursor: pointer; outline: none;
+}
+.mix-master-range::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 13px; height: 13px;
+  border-radius: 50%; background: #d4a876; cursor: pointer;
+}
+.mix-master-range::-moz-range-thumb { width:13px;height:13px;border:none;border-radius:50%;background:#d4a876; }
+
+/* active sound items */
+.mix-list { display: flex; flex-direction: column; gap: 7px; }
+.mix-empty {
+  font-size: .78rem; color: #b0a090; font-style: italic;
+  text-align: center; padding: 12px 0;
+}
+.asi {
+  background: #fff; border: 1px solid #e8e0d6; border-radius: 10px;
+  padding: 9px 10px; display: flex; flex-direction: column; gap: 6px;
+}
+.asi-top { display: flex; align-items: center; gap: 6px; }
+.asi-icon { font-size: 1rem; flex-shrink: 0; }
+.asi-name { font-size: .76rem; font-weight: 600; color: #2d2419; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.asi-remove {
+  background: none; border: none; cursor: pointer;
+  color: #b0a090; font-size: .75rem; padding: 2px 4px;
+  border-radius: 4px; flex-shrink: 0; transition: color .15s;
+  line-height: 1;
+}
+.asi-remove:hover { color: #e05555; }
+.asi-vol {
+  width: 100%; height: 3px; -webkit-appearance: none; appearance: none;
+  background: #e8e0d6; border-radius: 2px; cursor: pointer; outline: none;
+}
+.asi-vol::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 12px; height: 12px;
+  border-radius: 50%; background: #d4a876; cursor: pointer;
+}
+.asi-vol::-moz-range-thumb { width:12px;height:12px;border:none;border-radius:50%;background:#d4a876; }
+
+/* presets */
+.preset-list { display: flex; flex-direction: column; gap: 5px; }
+.preset-row { display: flex; align-items: center; gap: 5px; }
+.preset-load-btn {
+  flex: 1; padding: 7px 10px; background: #fff; border: 1px solid #e8e0d6;
+  border-radius: 8px; cursor: pointer; font-size: .76rem; color: #2d2419;
+  text-align: left; transition: background .15s, border-color .15s;
+  font-family: 'Nunito Sans', sans-serif; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.preset-load-btn:hover { background: #fff8ee; border-color: #d4a876; }
+.preset-del-btn {
+  background: none; border: none; cursor: pointer;
+  color: #b0a090; font-size: .75rem; padding: 5px; border-radius: 4px;
+  flex-shrink: 0; transition: color .15s;
+}
+.preset-del-btn:hover { color: #e05555; }
+.preset-save-row { display: flex; gap: 6px; margin-top: 8px; }
+.preset-name-input {
+  flex: 1; padding: 7px 10px; border: 1px solid #e8e0d6; border-radius: 8px;
+  font-family: 'Nunito Sans', sans-serif; font-size: .76rem; color: #2d2419;
+  background: #fff; outline: none; transition: border-color .15s;
+  min-width: 0;
+}
+.preset-name-input::placeholder { color: #b0a090; }
+.preset-name-input:focus { border-color: #d4a876; }
+.preset-save-btn {
+  background: #d4a876; border: none; border-radius: 8px;
+  color: #fff; padding: 7px 11px; font-size: .74rem;
+  cursor: pointer; font-family: 'Nunito Sans', sans-serif; font-weight: 600;
+  transition: opacity .15s; flex-shrink: 0;
+}
+.preset-save-btn:hover { opacity: .85; }
+
+/* ── Responsive ───────────────────────────────── */
 @media (max-width: 720px) {
   html, body { overflow-y: auto; }
-  .app {
-    grid-template-columns: 1fr;
-    height: auto;
-    padding: 20px;
-    gap: 14px;
-  }
+  .app { grid-template-columns: 1fr; height: auto; padding: 20px; gap: 14px; }
   .time-display { font-size: 4rem; }
   .sidebar { grid-row: 3; }
+  .sm-body { grid-template-columns: 1fr; }
+  .sm-tabs { flex-direction: row; flex-wrap: wrap; border-right: none; border-bottom: 1px solid #e8e0d6; overflow-x: auto; }
+  .sm-mix { border-left: none; border-top: 1px solid #e8e0d6; }
+  .sm-panel.active { grid-template-columns: repeat(2, 1fr); }
 }
 </style>
 </head>
@@ -498,79 +456,90 @@ input[type=range]::-moz-range-thumb {
 <div id="bg"></div>
 <div id="overlay"></div>
 
+<!-- ── Sound Modal ──────────────────────────────────────────── -->
+<div id="soundModal" class="sound-modal hidden">
+  <div class="sm-backdrop" id="smBackdrop"></div>
+  <div class="sm-dialog">
+    <!-- Header -->
+    <div class="sm-header">
+      <span class="sm-title">Sounds</span>
+      <div class="sm-master-row">
+        <span>🔈</span>
+        <input type="range" id="masterVolSlider" class="sm-master-vol" min="0" max="1" step="0.01" value="0.7">
+        <span>🔊</span>
+      </div>
+      <button class="sm-close" id="smClose">✕</button>
+    </div>
+    <!-- Body -->
+    <div class="sm-body">
+      <!-- Tabs -->
+      <nav class="sm-tabs" id="smTabs"></nav>
+      <!-- Grid -->
+      <div class="sm-grid" id="smGrid"></div>
+      <!-- Mix Panel -->
+      <aside class="sm-mix">
+        <div class="sm-mix-section">
+          <div class="sm-section-label">Now Playing</div>
+          <div class="mix-list" id="mixList">
+            <p class="mix-empty">No sounds active</p>
+          </div>
+        </div>
+        <div class="sm-mix-section">
+          <div class="sm-section-label">Presets</div>
+          <div class="preset-list" id="presetList"></div>
+          <div class="preset-save-row">
+            <input type="text" class="preset-name-input" id="presetNameInput" placeholder="Preset name…" maxlength="30">
+            <button class="preset-save-btn" id="presetSaveBtn">Save</button>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</div>
+
+<!-- ── App ─────────────────────────────────────────────────── -->
 <div class="app">
 
-  <!-- Header -->
   <header class="header">
     <div class="logo">focus.</div>
-    <div class="mode-toggle">
-      <button class="mode-btn active" data-mode="work">Work</button>
-      <button class="mode-btn" data-mode="short">Short Break</button>
-      <button class="mode-btn" data-mode="long">Long Break</button>
+    <div class="header-right">
+      <button class="sounds-btn" id="soundsBtn">
+        ♪ Sounds
+        <span class="sounds-badge" id="soundsBadge"></span>
+      </button>
+      <div class="mode-toggle">
+        <button class="mode-btn active" data-mode="work">Work</button>
+        <button class="mode-btn" data-mode="short">Short Break</button>
+        <button class="mode-btn" data-mode="long">Long Break</button>
+      </div>
     </div>
   </header>
 
-  <!-- Timer -->
   <main class="timer-card">
     <div class="ring-wrap">
       <svg class="timer-ring" width="250" height="250" viewBox="0 0 250 250">
-        <circle class="ring-bg" cx="125" cy="125" r="108"/>
-        <circle class="ring-track" cx="125" cy="125" r="108"/>
-        <circle class="ring-progress" id="ring" cx="125" cy="125" r="108"
+        <circle class="ring-bg"       cx="125" cy="125" r="108"/>
+        <circle class="ring-track"    cx="125" cy="125" r="108"/>
+        <circle class="ring-progress" cx="125" cy="125" r="108" id="ring"
                 stroke-dasharray="678.6" stroke-dashoffset="0"/>
       </svg>
       <div class="timer-center">
         <div class="time-display" id="timeDisplay">25:00</div>
-        <div class="mode-label" id="modeLabel">Focus Time</div>
+        <div class="mode-label"   id="modeLabel">Focus Time</div>
       </div>
     </div>
-
     <div class="controls">
       <button class="btn-icon" id="resetBtn" title="Reset">↺</button>
       <button class="btn-play" id="playBtn">▶</button>
-      <button class="btn-icon" id="skipBtn" title="Skip">⇥</button>
+      <button class="btn-icon" id="skipBtn"  title="Skip">⇥</button>
     </div>
-
     <div class="pips" id="pips">
-      <div class="pip"></div>
-      <div class="pip"></div>
-      <div class="pip"></div>
-      <div class="pip"></div>
+      <div class="pip"></div><div class="pip"></div>
+      <div class="pip"></div><div class="pip"></div>
     </div>
   </main>
 
-  <!-- Sidebar -->
   <div class="sidebar">
-
-    <!-- Sounds -->
-    <div class="panel">
-      <div class="panel-label">Ambient Sound</div>
-      <div class="sound-grid">
-        <button class="sound-btn" data-sound="rain">
-          <span class="sound-icon">🌧</span>
-          <span class="sound-name">Rain</span>
-        </button>
-        <button class="sound-btn" data-sound="lofi">
-          <span class="sound-icon">🎵</span>
-          <span class="sound-name">Lo-fi</span>
-        </button>
-        <button class="sound-btn" data-sound="forest">
-          <span class="sound-icon">🌿</span>
-          <span class="sound-name">Forest</span>
-        </button>
-        <button class="sound-btn" data-sound="ocean">
-          <span class="sound-icon">🌊</span>
-          <span class="sound-name">Ocean</span>
-        </button>
-      </div>
-      <div class="vol-row">
-        <span>🔈</span>
-        <input type="range" id="volSlider" min="0" max="1" step="0.01" value="0.45">
-        <span>🔊</span>
-      </div>
-    </div>
-
-    <!-- Tasks -->
     <div class="panel tasks-panel">
       <div class="panel-label">Tasks</div>
       <div class="task-input-row">
@@ -579,28 +548,23 @@ input[type=range]::-moz-range-thumb {
       </div>
       <ul class="task-list" id="taskList"></ul>
     </div>
-
   </div>
+
 </div>
 
 <script>
-// ─────────────────────────────────────────────────
-//  TIMER ENGINE
-// ─────────────────────────────────────────────────
-const CIRC = 2 * Math.PI * 108; // 678.58…
-
+'use strict';
+// ═══════════════════════════════════════════════════════════════
+//  TIMER ENGINE  (unchanged logic)
+// ═══════════════════════════════════════════════════════════════
+const CIRC = 2 * Math.PI * 108;
 const MODES = {
-  work:  { label: 'Focus Time',   secs: 25 * 60, break: false },
-  short: { label: 'Short Break',  secs:  5 * 60, break: true  },
-  long:  { label: 'Long Break',   secs: 15 * 60, break: true  },
+  work:  { label: 'Focus Time',  secs: 25*60, break: false },
+  short: { label: 'Short Break', secs:  5*60, break: true  },
+  long:  { label: 'Long Break',  secs: 15*60, break: true  },
 };
-
-let mode      = 'work';
-let total     = MODES.work.secs;
-let remaining = total;
-let running   = false;
-let ticker    = null;
-let sessions  = 0;
+let mode = 'work', total = MODES.work.secs, remaining = total;
+let running = false, ticker = null, sessions = 0;
 
 const timeEl   = document.getElementById('timeDisplay');
 const labelEl  = document.getElementById('modeLabel');
@@ -610,92 +574,63 @@ const resetBtn = document.getElementById('resetBtn');
 const skipBtn  = document.getElementById('skipBtn');
 const pipsEl   = document.getElementById('pips');
 
-function fmt(s) {
-  return `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
-}
+const fmt = s => `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
 
-function refreshRing() {
-  ringEl.style.strokeDashoffset = CIRC * (1 - remaining / total);
-}
+function refreshRing() { ringEl.style.strokeDashoffset = CIRC * (1 - remaining/total); }
 
 function applyMode(m) {
-  mode = m;
-  total = remaining = MODES[m].secs;
-  running = false;
-  clearInterval(ticker);
+  mode = m; total = remaining = MODES[m].secs;
+  running = false; clearInterval(ticker);
   playBtn.textContent = '▶';
   timeEl.textContent = fmt(remaining);
   labelEl.textContent = MODES[m].label;
   ringEl.style.strokeDashoffset = 0;
-
   const isBreak = MODES[m].break;
   ringEl.classList.toggle('is-break', isBreak);
   playBtn.classList.toggle('is-break', isBreak);
   labelEl.classList.toggle('is-break', isBreak);
-
+  document.body.classList.toggle('mode-work',  !isBreak);
+  document.body.classList.toggle('mode-break',  isBreak);
   document.querySelectorAll('.mode-btn').forEach(b => {
-    b.classList.remove('active', 'break-active');
+    b.classList.remove('active','break-active');
     if (b.dataset.mode === m) b.classList.add(isBreak ? 'break-active' : 'active');
   });
 }
 
 function tick() {
   remaining = Math.max(0, remaining - 1);
-  timeEl.textContent = fmt(remaining);
-  refreshRing();
+  timeEl.textContent = fmt(remaining); refreshRing();
   if (remaining === 0) {
-    clearInterval(ticker);
-    running = false;
-    playBtn.textContent = '▶';
+    clearInterval(ticker); running = false; playBtn.textContent = '▶';
     chime();
-    if (!MODES[mode].break) {
-      sessions = Math.min(sessions + 1, 4);
-      refreshPips(true);
-    }
+    if (!MODES[mode].break) { sessions = Math.min(sessions+1, 4); refreshPips(true); }
     setTimeout(() => applyMode(MODES[mode].break ? 'work' : 'short'), 1000);
   }
 }
 
 function togglePlay() {
-  if (running) {
-    clearInterval(ticker);
-    running = false;
-    playBtn.textContent = '▶';
-  } else {
-    ticker = setInterval(tick, 1000);
-    running = true;
-    playBtn.textContent = '⏸';
-  }
+  if (running) { clearInterval(ticker); running = false; playBtn.textContent = '▶'; }
+  else { ticker = setInterval(tick, 1000); running = true; playBtn.textContent = '⏸'; }
 }
 
 function refreshPips(bounce = false) {
-  const pips = pipsEl.querySelectorAll('.pip');
-  pips.forEach((p, i) => {
-    const done = i < sessions;
-    p.classList.toggle('done', done);
-    if (done && bounce && i === sessions - 1) {
-      p.classList.remove('bounce');
-      void p.offsetWidth;
-      p.classList.add('bounce');
-    }
+  pipsEl.querySelectorAll('.pip').forEach((p, i) => {
+    const done = i < sessions; p.classList.toggle('done', done);
+    if (done && bounce && i === sessions-1) { p.classList.remove('bounce'); void p.offsetWidth; p.classList.add('bounce'); }
   });
 }
 
 function chime() {
   try {
     const ctx = getCtx();
-    const freqs = [523.25, 659.25, 783.99];
-    freqs.forEach((f, i) => {
-      const osc = ctx.createOscillator();
-      const g = ctx.createGain();
-      osc.type = 'sine';
-      osc.frequency.value = f;
-      g.gain.setValueAtTime(0, ctx.currentTime + i * 0.18);
-      g.gain.linearRampToValueAtTime(0.12, ctx.currentTime + i * 0.18 + 0.05);
-      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.18 + 0.7);
+    [523.25, 659.25, 783.99].forEach((f, i) => {
+      const osc = ctx.createOscillator(), g = ctx.createGain();
+      osc.type = 'sine'; osc.frequency.value = f;
+      g.gain.setValueAtTime(0, ctx.currentTime + i*.18);
+      g.gain.linearRampToValueAtTime(0.12, ctx.currentTime + i*.18 + .05);
+      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i*.18 + .7);
       osc.connect(g); g.connect(ctx.destination);
-      osc.start(ctx.currentTime + i * 0.18);
-      osc.stop(ctx.currentTime + i * 0.18 + 0.8);
+      osc.start(ctx.currentTime + i*.18); osc.stop(ctx.currentTime + i*.18 + .8);
     });
   } catch(e) {}
 }
@@ -703,223 +638,861 @@ function chime() {
 playBtn.addEventListener('click', togglePlay);
 resetBtn.addEventListener('click', () => applyMode(mode));
 skipBtn.addEventListener('click', () => {
-  clearInterval(ticker);
-  running = false;
-  if (!MODES[mode].break) { sessions = Math.min(sessions + 1, 4); refreshPips(true); }
+  clearInterval(ticker); running = false;
+  if (!MODES[mode].break) { sessions = Math.min(sessions+1,4); refreshPips(true); }
   applyMode(MODES[mode].break ? 'work' : 'short');
 });
-document.querySelectorAll('.mode-btn').forEach(b => {
-  b.addEventListener('click', () => applyMode(b.dataset.mode));
-});
-
+document.querySelectorAll('.mode-btn').forEach(b => b.addEventListener('click', () => applyMode(b.dataset.mode)));
 applyMode('work');
 
-// ─────────────────────────────────────────────────
-//  WEB AUDIO AMBIENT ENGINE
-// ─────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════
+//  MULTI-SOUND AUDIO ENGINE
+// ═══════════════════════════════════════════════════════════════
 let audioCtx   = null;
 let masterGain = null;
-let activeNodes = [];
-let currentSound = null;
+const activeSounds = new Map(); // id → { stopFn, gainNode, vol }
 
 function getCtx() {
   if (!audioCtx) {
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     masterGain = audioCtx.createGain();
-    masterGain.gain.value = parseFloat(document.getElementById('volSlider').value);
+    masterGain.gain.value = parseFloat(document.getElementById('masterVolSlider').value);
     masterGain.connect(audioCtx.destination);
   }
   if (audioCtx.state === 'suspended') audioCtx.resume();
   return audioCtx;
 }
 
-function makeNoiseBuffer(ctx, type = 'white') {
+// ── Helpers ────────────────────────────────────────────────────
+const R = Math.random;
+
+function tryStop(src) { try { src.stop(); } catch(e) {} }
+
+function bq(c, type, freq, q = 0.7) {
+  const f = c.createBiquadFilter();
+  f.type = type; f.frequency.value = freq; f.Q.value = q;
+  return f;
+}
+
+function makeBuf(ctx, type) {
   const len = ctx.sampleRate * 4;
   const buf = ctx.createBuffer(1, len, ctx.sampleRate);
   const d   = buf.getChannelData(0);
   if (type === 'white') {
-    for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
-  } else { // pink
+    for (let i = 0; i < len; i++) d[i] = R()*2 - 1;
+  } else if (type === 'pink') {
     let b0=0,b1=0,b2=0,b3=0,b4=0,b5=0,b6=0;
     for (let i = 0; i < len; i++) {
-      const w = Math.random() * 2 - 1;
+      const w = R()*2 - 1;
       b0=0.99886*b0+w*0.0555179; b1=0.99332*b1+w*0.0750759;
-      b2=0.969*b2+w*0.153852;    b3=0.8665*b3+w*0.3104856;
-      b4=0.55*b4+w*0.5329522;    b5=-0.7616*b5-w*0.016898;
-      d[i] = (b0+b1+b2+b3+b4+b5+b6+w*0.5362)*0.11;
-      b6 = w*0.115926;
+      b2=0.969*b2+w*0.153852;   b3=0.8665*b3+w*0.3104856;
+      b4=0.55*b4+w*0.5329522;   b5=-0.7616*b5-w*0.016898;
+      d[i] = (b0+b1+b2+b3+b4+b5+b6+w*0.5362)*0.11; b6=w*0.115926;
+    }
+  } else { // brown
+    let last = 0;
+    for (let i = 0; i < len; i++) {
+      const w = R()*2 - 1; d[i] = (last + 0.02*w)/1.02; last = d[i]; d[i] *= 3.5;
     }
   }
   return buf;
 }
 
-function noiseSource(ctx, type) {
-  const src = ctx.createBufferSource();
-  src.buffer = makeNoiseBuffer(ctx, type);
-  src.loop = true;
-  return src;
+function ns(c, type) {
+  const s = c.createBufferSource(); s.buffer = makeBuf(c, type); s.loop = true; return s;
 }
 
-function stopAll() {
-  activeNodes.forEach(n => {
-    try {
-      n.gain.gain.setTargetAtTime(0, audioCtx.currentTime, 0.25);
-      setTimeout(() => { try { n.src?.stop(); } catch(e){} }, 600);
-    } catch(e){}
+// One-shot oscillator impulse (for drips, clicks, etc.)
+function pulse(c, out, type, freq, vol, dur) {
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type; o.frequency.value = freq;
+  g.gain.setValueAtTime(vol, c.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + dur);
+  o.connect(g); g.connect(out);
+  o.start(); o.stop(c.currentTime + dur + 0.01);
+}
+
+// Add / remove / volume control
+function addSound(id, vol = 0.5) {
+  if (activeSounds.has(id)) return;
+  const ctx      = getCtx();
+  const gainNode = ctx.createGain();
+  gainNode.gain.setValueAtTime(0, ctx.currentTime);
+  gainNode.connect(masterGain);
+  gainNode.gain.setTargetAtTime(vol, ctx.currentTime, 0.4);
+  const stopFn = GENERATORS[id](ctx, gainNode);
+  activeSounds.set(id, { stopFn, gainNode, vol });
+  updateSoundUI();
+}
+
+function removeSound(id) {
+  if (!activeSounds.has(id)) return;
+  const { stopFn, gainNode } = activeSounds.get(id);
+  gainNode.gain.setTargetAtTime(0, audioCtx.currentTime, 0.3);
+  setTimeout(() => { stopFn(); try { gainNode.disconnect(); } catch(e){} }, 1000);
+  activeSounds.delete(id);
+  updateSoundUI();
+}
+
+function setSoundVol(id, vol) {
+  if (!activeSounds.has(id)) return;
+  const entry = activeSounds.get(id);
+  entry.gainNode.gain.setTargetAtTime(vol, audioCtx.currentTime, 0.08);
+  entry.vol = vol;
+}
+
+function toggleSound(id, vol) {
+  if (activeSounds.has(id)) removeSound(id);
+  else addSound(id, vol !== undefined ? vol : 0.5);
+}
+
+// ── Sound Generators ───────────────────────────────────────────
+const GENERATORS = {};
+
+// Helper: noise drain through filters into output
+function rainBase(c, out, noiseType, hpFreq, lpFreq) {
+  const s = ns(c, noiseType), h = bq(c,'highpass',hpFreq), l = bq(c,'lowpass',lpFreq,.4);
+  s.connect(h); h.connect(l); l.connect(out); s.start(); return s;
+}
+
+// ─── RAIN ──────────────────────────────────────────────────────
+GENERATORS['light-rain'] = (c, o) => {
+  const s = rainBase(c, o, 'white', 300, 1400);
+  let on = true;
+  const drip = () => { if (!on) return; pulse(c, o, 'sine', 700+R()*500, .055, .14); setTimeout(drip, 900+R()*1500); };
+  drip(); return () => { on=false; tryStop(s); };
+};
+
+GENERATORS['heavy-rain'] = (c, o) => {
+  const s = rainBase(c, o, 'pink', 400, 2000);
+  let on = true;
+  const drip = () => { if (!on) return; pulse(c, o, 'sine', 650+R()*600, .068, .17); setTimeout(drip, 100+R()*360); };
+  drip(); return () => { on=false; tryStop(s); };
+};
+
+GENERATORS['rain-window'] = (c, o) => {
+  const s = rainBase(c, o, 'white', 600, 3000);
+  let on = true;
+  const tap = () => {
+    if (!on) return;
+    const f = 900+R()*1100, oo=c.createOscillator(), g=c.createGain();
+    oo.type='triangle'; oo.frequency.setValueAtTime(f,c.currentTime); oo.frequency.exponentialRampToValueAtTime(f*.8,c.currentTime+.12);
+    g.gain.setValueAtTime(.08,c.currentTime); g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.18);
+    oo.connect(g); g.connect(o); oo.start(); oo.stop(c.currentTime+.2);
+    setTimeout(tap, 350+R()*1000);
+  };
+  tap(); return () => { on=false; tryStop(s); };
+};
+
+GENERATORS['rain-roof'] = (c, o) => {
+  const s = rainBase(c, o, 'white', 500, 2200);
+  let on = true;
+  const drop = () => {
+    if (!on) return;
+    const f=1200+R()*800, oo=c.createOscillator(), g=c.createGain();
+    oo.type='triangle'; oo.frequency.setValueAtTime(f,c.currentTime); oo.frequency.exponentialRampToValueAtTime(f*.85,c.currentTime+.15);
+    g.gain.setValueAtTime(.08,c.currentTime); g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.2);
+    oo.connect(g); g.connect(o); oo.start(); oo.stop(c.currentTime+.22);
+    setTimeout(drop, 160+R()*600);
+  };
+  drop(); return () => { on=false; tryStop(s); };
+};
+
+GENERATORS['rain-thunder'] = (c, o) => {
+  const s = rainBase(c, o, 'pink', 300, 1800);
+  let on = true;
+  const drip = () => { if (!on) return; pulse(c, o, 'sine', 700+R()*500, .055, .15); setTimeout(drip, 140+R()*500); };
+  drip();
+  const thunder = () => {
+    if (!on) return;
+    const delay = 2000+R()*4000;
+    setTimeout(() => {
+      if (!on) return;
+      const ro=c.createOscillator(), rg=c.createGain();
+      ro.type='sine'; ro.frequency.value=38+R()*55;
+      rg.gain.setValueAtTime(0,c.currentTime); rg.gain.linearRampToValueAtTime(.22,c.currentTime+.12); rg.gain.exponentialRampToValueAtTime(.01,c.currentTime+1.8);
+      ro.connect(rg); rg.connect(o); ro.start(); ro.stop(c.currentTime+2);
+      const cs=ns(c,'white'), cf=bq(c,'highpass',3200), cg=c.createGain();
+      cg.gain.setValueAtTime(0,c.currentTime); cg.gain.linearRampToValueAtTime(.28,c.currentTime+.04); cg.gain.exponentialRampToValueAtTime(.001,c.currentTime+.45);
+      cs.connect(cf); cf.connect(cg); cg.connect(o); cs.start(); cs.stop(c.currentTime+.5);
+    }, delay);
+    setTimeout(thunder, 6000+R()*5000);
+  };
+  thunder(); return () => { on=false; tryStop(s); };
+};
+
+GENERATORS['distant-thunder'] = (c, o) => {
+  const s = ns(c, 'pink'), l = bq(c,'lowpass',180,.5);
+  s.connect(l); l.connect(o); s.start();
+  let on = true;
+  const boom = () => {
+    if (!on) return;
+    const ro=c.createOscillator(), rg=c.createGain();
+    ro.type='sine'; ro.frequency.value=28+R()*35;
+    rg.gain.setValueAtTime(0,c.currentTime); rg.gain.linearRampToValueAtTime(.18,c.currentTime+.4); rg.gain.exponentialRampToValueAtTime(.001,c.currentTime+3.5);
+    ro.connect(rg); rg.connect(o); ro.start(); ro.stop(c.currentTime+4);
+    setTimeout(boom, 8000+R()*9000);
+  };
+  boom(); return () => { on=false; tryStop(s); };
+};
+
+// ─── NATURE ────────────────────────────────────────────────────
+GENERATORS['forest'] = (c, o) => {
+  const s = ns(c,'pink'), l = bq(c,'lowpass',500);
+  s.connect(l); l.connect(o); s.start();
+  let on = true;
+  const bird = () => {
+    if (!on) return;
+    const n = 2+Math.floor(R()*3);
+    for (let i=0;i<n;i++) setTimeout(() => {
+      if (!on) return;
+      const f=1600+R()*1400, ob=c.createOscillator(), bg=c.createGain();
+      ob.type='sine'; ob.frequency.setValueAtTime(f,c.currentTime); ob.frequency.linearRampToValueAtTime(f*1.25,c.currentTime+.09); ob.frequency.linearRampToValueAtTime(f,c.currentTime+.18);
+      bg.gain.setValueAtTime(0,c.currentTime); bg.gain.linearRampToValueAtTime(.04,c.currentTime+.02); bg.gain.linearRampToValueAtTime(0,c.currentTime+.2);
+      ob.connect(bg); bg.connect(o); ob.start(); ob.stop(c.currentTime+.22);
+    }, i*160);
+    setTimeout(bird, 1800+R()*3800);
+  };
+  bird(); return () => { on=false; tryStop(s); };
+};
+
+GENERATORS['wind'] = (c, o) => {
+  const wg = c.createGain(); wg.gain.value = 0;
+  const s = ns(c,'pink'), h=bq(c,'highpass',80), l=bq(c,'lowpass',600);
+  s.connect(h); h.connect(l); l.connect(wg); wg.connect(o); s.start();
+  // LFO for swaying
+  const lfo=c.createOscillator(), lg=c.createGain();
+  lfo.type='sine'; lfo.frequency.value=.1; lg.gain.value=.22;
+  lfo.connect(lg); lg.connect(wg.gain); wg.gain.value=.35;
+  lfo.start();
+  return () => { tryStop(s); tryStop(lfo); };
+};
+
+GENERATORS['ocean'] = (c, o) => {
+  const wg = c.createGain(); wg.gain.value=.1;
+  const s=ns(c,'pink'), l=bq(c,'lowpass',800);
+  s.connect(l); l.connect(wg); wg.connect(o); s.start();
+  let on=true, ph=0;
+  const wave = () => {
+    if (!on) return;
+    const t=c.currentTime, dur=3.5+R()*1.5;
+    wg.gain.cancelScheduledValues(t);
+    if (ph%2===0) { wg.gain.setValueAtTime(.08,t); wg.gain.linearRampToValueAtTime(.75,t+dur*.4); wg.gain.linearRampToValueAtTime(.1,t+dur); }
+    else           { wg.gain.setValueAtTime(.1,t); wg.gain.linearRampToValueAtTime(.06,t+dur); }
+    ph++; setTimeout(wave, dur*1000);
+  };
+  wave(); return () => { on=false; tryStop(s); };
+};
+
+GENERATORS['river'] = (c, o) => {
+  const s=ns(c,'white'), h=bq(c,'highpass',280), l=bq(c,'lowpass',1600);
+  s.connect(h); h.connect(l); l.connect(o); s.start();
+  return () => tryStop(s);
+};
+
+GENERATORS['birds'] = (c, o) => {
+  let on=true;
+  const chirp = () => {
+    if (!on) return;
+    const n=3+Math.floor(R()*4);
+    for (let i=0;i<n;i++) setTimeout(() => {
+      if (!on) return;
+      const f=2000+R()*2200, ob=c.createOscillator(), bg=c.createGain();
+      ob.type='sine'; ob.frequency.setValueAtTime(f,c.currentTime); ob.frequency.linearRampToValueAtTime(f*(1.1+R()*.3),c.currentTime+.07); ob.frequency.linearRampToValueAtTime(f,c.currentTime+.15);
+      bg.gain.setValueAtTime(0,c.currentTime); bg.gain.linearRampToValueAtTime(.055,c.currentTime+.02); bg.gain.linearRampToValueAtTime(0,c.currentTime+.17);
+      ob.connect(bg); bg.connect(o); ob.start(); ob.stop(c.currentTime+.19);
+    }, i*(110+R()*70));
+    setTimeout(chirp, 500+R()*2000);
+  };
+  chirp(); return () => { on=false; };
+};
+
+// ─── ZEN ───────────────────────────────────────────────────────
+GENERATORS['alpha'] = (c, o) => {
+  const s=ns(c,'pink'), l=bq(c,'lowpass',380);
+  s.connect(l); l.connect(o); s.start();
+  const base=c.createOscillator(), bg=c.createGain();
+  base.type='sine'; base.frequency.value=180; bg.gain.value=.04;
+  const lfo=c.createOscillator(), lg=c.createGain();
+  lfo.type='sine'; lfo.frequency.value=10; lg.gain.value=.035;
+  lfo.connect(lg); lg.connect(bg.gain); base.connect(bg); bg.connect(o);
+  base.start(); lfo.start();
+  return () => { tryStop(s); tryStop(base); tryStop(lfo); };
+};
+
+GENERATORS['theta'] = (c, o) => {
+  const s=ns(c,'pink'), l=bq(c,'lowpass',300);
+  s.connect(l); l.connect(o); s.start();
+  const base=c.createOscillator(), bg=c.createGain();
+  base.type='sine'; base.frequency.value=160; bg.gain.value=.04;
+  const lfo=c.createOscillator(), lg=c.createGain();
+  lfo.type='sine'; lfo.frequency.value=6; lg.gain.value=.035;
+  lfo.connect(lg); lg.connect(bg.gain); base.connect(bg); bg.connect(o);
+  base.start(); lfo.start();
+  return () => { tryStop(s); tryStop(base); tryStop(lfo); };
+};
+
+GENERATORS['chimes'] = (c, o) => {
+  const freqs=[523.25,587.33,659.25,783.99,880,1046.5];
+  let on=true;
+  const chime = () => {
+    if (!on) return;
+    const f=freqs[Math.floor(R()*freqs.length)];
+    const ob=c.createOscillator(), bg=c.createGain();
+    ob.type='sine'; ob.frequency.value=f;
+    bg.gain.setValueAtTime(.09,c.currentTime); bg.gain.exponentialRampToValueAtTime(.001,c.currentTime+2.8);
+    ob.connect(bg); bg.connect(o); ob.start(); ob.stop(c.currentTime+3);
+    const ob2=c.createOscillator(), bg2=c.createGain();
+    ob2.type='sine'; ob2.frequency.value=f*2.75;
+    bg2.gain.setValueAtTime(.02,c.currentTime); bg2.gain.exponentialRampToValueAtTime(.001,c.currentTime+1.2);
+    ob2.connect(bg2); bg2.connect(o); ob2.start(); ob2.stop(c.currentTime+1.4);
+    setTimeout(chime, 2000+R()*3500);
+  };
+  chime(); return () => { on=false; };
+};
+
+// ─── CITY ──────────────────────────────────────────────────────
+GENERATORS['traffic'] = (c, o) => {
+  const s=ns(c,'pink'), l=bq(c,'lowpass',200);
+  s.connect(l); l.connect(o); s.start();
+  let on=true;
+  const car = () => {
+    if (!on) return;
+    const s2=ns(c,'pink'), b=bq(c,'bandpass',280,1.8), g=c.createGain();
+    g.gain.setValueAtTime(0,c.currentTime); g.gain.linearRampToValueAtTime(.18,c.currentTime+.55); g.gain.linearRampToValueAtTime(0,c.currentTime+2.8);
+    s2.connect(b); b.connect(g); g.connect(o); s2.start(); s2.stop(c.currentTime+3);
+    setTimeout(car, 3000+R()*7000);
+  };
+  car(); return () => { on=false; tryStop(s); };
+};
+
+GENERATORS['night-city'] = (c, o) => {
+  const s=ns(c,'pink'), l=bq(c,'lowpass',150);
+  s.connect(l); l.connect(o); s.start();
+  let on=true;
+  const distant = () => {
+    if (!on) return; pulse(c, o, 'sine', 80+R()*40, .05, .9); setTimeout(distant, 4000+R()*7000);
+  };
+  distant(); return () => { on=false; tryStop(s); };
+};
+
+GENERATORS['street'] = (c, o) => {
+  const s=ns(c,'white'), h=bq(c,'highpass',200), l=bq(c,'lowpass',1100);
+  s.connect(h); h.connect(l); l.connect(o); s.start();
+  return () => tryStop(s);
+};
+
+GENERATORS['subway'] = (c, o) => {
+  const s=ns(c,'pink'), l=bq(c,'lowpass',320);
+  s.connect(l); l.connect(o); s.start();
+  const d=c.createOscillator(), dg=c.createGain();
+  d.type='sawtooth'; d.frequency.value=82; dg.gain.value=.038;
+  d.connect(dg); dg.connect(o); d.start();
+  return () => { tryStop(s); tryStop(d); };
+};
+
+// ─── CAFE ──────────────────────────────────────────────────────
+GENERATORS['coffee'] = (c, o) => {
+  const s=ns(c,'pink'), b=bq(c,'bandpass',700,1.4);
+  s.connect(b); b.connect(o); s.start();
+  let on=true;
+  const voice = () => {
+    if (!on) return;
+    const dur=.3+R()*.9, s2=ns(c,'pink'), vf=bq(c,'bandpass',500+R()*600,2), vg=c.createGain();
+    vg.gain.setValueAtTime(0,c.currentTime); vg.gain.linearRampToValueAtTime(.14,c.currentTime+.05); vg.gain.setValueAtTime(.14,c.currentTime+dur-.06); vg.gain.linearRampToValueAtTime(0,c.currentTime+dur);
+    s2.connect(vf); vf.connect(vg); vg.connect(o); s2.start(); s2.stop(c.currentTime+dur+.02);
+    setTimeout(voice, 180+R()*1400);
+  };
+  voice(); return () => { on=false; tryStop(s); };
+};
+
+GENERATORS['library'] = (c, o) => {
+  const s=ns(c,'white'), l=bq(c,'lowpass',380);
+  s.connect(l); l.connect(o); s.start();
+  let on=true;
+  const page = () => {
+    if (!on) return;
+    const s2=ns(c,'white'), h=bq(c,'highpass',800), g=c.createGain();
+    g.gain.setValueAtTime(0,c.currentTime); g.gain.linearRampToValueAtTime(.09,c.currentTime+.06); g.gain.linearRampToValueAtTime(0,c.currentTime+.3);
+    s2.connect(h); h.connect(g); g.connect(o); s2.start(); s2.stop(c.currentTime+.35);
+    setTimeout(page, 5000+R()*12000);
+  };
+  page(); return () => { on=false; tryStop(s); };
+};
+
+GENERATORS['typing'] = (c, o) => {
+  let on=true;
+  const burst = () => {
+    if (!on) return;
+    const n=5+Math.floor(R()*9);
+    for (let i=0;i<n;i++) setTimeout(() => {
+      if (!on) return;
+      const s2=ns(c,'white'), h=bq(c,'highpass',1800), g=c.createGain();
+      g.gain.setValueAtTime(.065,c.currentTime); g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.045);
+      s2.connect(h); h.connect(g); g.connect(o); s2.start(); s2.stop(c.currentTime+.055);
+    }, i*(75+R()*55));
+    setTimeout(burst, 500+R()*3200);
+  };
+  burst(); return () => { on=false; };
+};
+
+// ─── OFFICE ────────────────────────────────────────────────────
+GENERATORS['office-chat'] = (c, o) => {
+  const s=ns(c,'pink'), b=bq(c,'bandpass',600,1.1);
+  s.connect(b); b.connect(o); s.start();
+  return () => tryStop(s);
+};
+
+GENERATORS['kb-cluster'] = (c, o) => {
+  let on=true;
+  const burst = () => {
+    if (!on) return;
+    const n=8+Math.floor(R()*14);
+    for (let i=0;i<n;i++) setTimeout(() => {
+      if (!on) return;
+      const s2=ns(c,'white'), h=bq(c,'highpass',1800), g=c.createGain();
+      g.gain.setValueAtTime(.07+R()*.03,c.currentTime); g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.05);
+      s2.connect(h); h.connect(g); g.connect(o); s2.start(); s2.stop(c.currentTime+.06);
+    }, i*(55+R()*45));
+    setTimeout(burst, 1200+R()*3800);
+  };
+  burst(); return () => { on=false; };
+};
+
+GENERATORS['printer'] = (c, o) => {
+  let on=true;
+  const scan = () => {
+    if (!on) return;
+    const dur=1.8+R()*2.2, s2=ns(c,'white'), b=bq(c,'bandpass',850,2.5), g=c.createGain();
+    g.gain.setValueAtTime(0,c.currentTime); g.gain.linearRampToValueAtTime(.07,c.currentTime+.1); g.gain.setValueAtTime(.07,c.currentTime+dur-.1); g.gain.linearRampToValueAtTime(0,c.currentTime+dur);
+    s2.connect(b); b.connect(g); g.connect(o); s2.start(); s2.stop(c.currentTime+dur+.05);
+    const ticks = Math.floor(dur*8);
+    for (let i=0;i<ticks;i++) setTimeout(() => {
+      if (!on) return;
+      const sc=ns(c,'white'), hc=bq(c,'highpass',3000), gc=c.createGain();
+      gc.gain.setValueAtTime(.045,c.currentTime); gc.gain.exponentialRampToValueAtTime(.001,c.currentTime+.022);
+      sc.connect(hc); hc.connect(gc); gc.connect(o); sc.start(); sc.stop(c.currentTime+.03);
+    }, i*125);
+    setTimeout(scan, 4500+R()*9000);
+  };
+  scan(); return () => { on=false; };
+};
+
+GENERATORS['movement'] = (c, o) => {
+  let on=true;
+  const step = () => {
+    if (!on) return; pulse(c, o, 'sine', 200+R()*100, .038, .14); setTimeout(step, 2200+R()*5500);
+  };
+  step(); return () => { on=false; };
+};
+
+// ─── TRAVEL ────────────────────────────────────────────────────
+GENERATORS['airplane'] = (c, o) => {
+  const s=ns(c,'pink'), l=bq(c,'lowpass',420);
+  s.connect(l); l.connect(o); s.start();
+  [110, 115.5, 220].forEach((f, i) => {
+    const d=c.createOscillator(), dg=c.createGain();
+    d.type='sawtooth'; d.frequency.value=f; dg.gain.value=[.055,.04,.018][i];
+    d.connect(dg); dg.connect(o); d.start();
   });
-  activeNodes = [];
-  currentSound = null;
+  // We can't reference them for cleanup, but they'll GC with the GainNode
+  return () => tryStop(s);
+};
+
+GENERATORS['train'] = (c, o) => {
+  const s=ns(c,'pink'), l=bq(c,'lowpass',300);
+  s.connect(l); l.connect(o); s.start();
+  let on=true;
+  const clack = () => {
+    if (!on) return;
+    [0, 165].forEach(delay => setTimeout(() => {
+      if (!on) return;
+      const ss=ns(c,'white'), h=bq(c,'bandpass',520,3.5), g=c.createGain();
+      const v = delay===0 ? .11 : .075;
+      g.gain.setValueAtTime(v,c.currentTime); g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.09);
+      ss.connect(h); h.connect(g); g.connect(o); ss.start(); ss.stop(c.currentTime+.11);
+    }, delay));
+    setTimeout(clack, 1080+R()*80);
+  };
+  clack(); return () => { on=false; tryStop(s); };
+};
+
+GENERATORS['bus'] = (c, o) => {
+  const s=ns(c,'pink'), l=bq(c,'lowpass',360);
+  s.connect(l); l.connect(o); s.start();
+  const d=c.createOscillator(), dg=c.createGain();
+  d.type='sawtooth'; d.frequency.value=92; dg.gain.value=.048;
+  d.connect(dg); dg.connect(o); d.start();
+  return () => { tryStop(s); tryStop(d); };
+};
+
+// ─── COZY ──────────────────────────────────────────────────────
+function fireCrackle(c, o, alive) {
+  const crackle = () => {
+    if (!alive()) return;
+    const s2=ns(c,'white'), h=bq(c,'bandpass',800+R()*1400,2.8), g=c.createGain();
+    g.gain.setValueAtTime(0,c.currentTime); g.gain.linearRampToValueAtTime(.065+R()*.055,c.currentTime+.012); g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.065+R()*.09);
+    s2.connect(h); h.connect(g); g.connect(o); s2.start(); s2.stop(c.currentTime+.2);
+    setTimeout(crackle, 140+R()*580);
+  };
+  crackle();
 }
 
-function reg(src, gainNode) {
-  activeNodes.push({ src, gain: gainNode });
-}
+GENERATORS['fireplace'] = (c, o) => {
+  const s=ns(c,'pink'), l=bq(c,'lowpass',360); s.connect(l); l.connect(o); s.start();
+  let on=true; fireCrackle(c, o, ()=>on);
+  return () => { on=false; tryStop(s); };
+};
 
-// Rain
-function startRain(ctx) {
-  const g   = ctx.createGain(); g.gain.value = 0; g.connect(masterGain);
-  const lpf = ctx.createBiquadFilter(); lpf.type = 'lowpass';  lpf.frequency.value = 1600; lpf.Q.value = 0.4;
-  const hpf = ctx.createBiquadFilter(); hpf.type = 'highpass'; hpf.frequency.value = 320;
-  const src = noiseSource(ctx, 'white');
-  src.connect(hpf); hpf.connect(lpf); lpf.connect(g);
-  src.start(); g.gain.setTargetAtTime(0.85, ctx.currentTime, 0.9); reg(src, g);
+GENERATORS['rain-fire'] = (c, o) => {
+  const sr=rainBase(c, o, 'pink', 280, 1700);
+  const sf=ns(c,'pink'), lf=bq(c,'lowpass',340); sf.connect(lf); lf.connect(o); sf.start();
+  let on=true; fireCrackle(c, o, ()=>on);
+  return () => { on=false; tryStop(sr); tryStop(sf); };
+};
 
-  // gentle drips
-  (function drip() {
-    if (!activeNodes.length) return;
-    const o = ctx.createOscillator(), dg = ctx.createGain();
-    o.type = 'sine'; o.frequency.value = 700 + Math.random()*500;
-    dg.gain.setValueAtTime(0.06, ctx.currentTime);
-    dg.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+0.14);
-    o.connect(dg); dg.connect(masterGain);
-    o.start(); o.stop(ctx.currentTime+0.15);
-    setTimeout(drip, 180 + Math.random()*1100);
-  })();
-}
+GENERATORS['cabin'] = (c, o) => {
+  const sw=ns(c,'pink'), hw=bq(c,'highpass',80), lw=bq(c,'lowpass',500);
+  sw.connect(hw); hw.connect(lw); lw.connect(o); sw.start();
+  const sf=ns(c,'pink'), lf=bq(c,'lowpass',300); sf.connect(lf); lf.connect(o); sf.start();
+  let on=true; fireCrackle(c, o, ()=>on);
+  return () => { on=false; tryStop(sw); tryStop(sf); };
+};
 
-// Lo-fi
-function startLofi(ctx) {
-  // Vinyl hiss
-  const hs  = noiseSource(ctx, 'white');
-  const hg  = ctx.createGain(); hg.gain.value = 0;
-  const hpf = ctx.createBiquadFilter(); hpf.type = 'highpass'; hpf.frequency.value = 5000;
-  hs.connect(hpf); hpf.connect(hg); hg.connect(masterGain);
-  hs.start(); hg.gain.setTargetAtTime(0.025, ctx.currentTime, 0.4); reg(hs, hg);
-
-  // Chord progression (Cmaj7 – Am7 – Fmaj7 – G7)
-  const chords = [
-    [130.8, 164.8, 196.0, 246.9],
-    [110.0, 130.8, 164.8, 196.0],
-    [87.31, 110.0, 130.8, 164.8],
-    [98.00, 123.5, 146.8, 185.0],
-  ];
-  let ci = 0;
-  const sentinel = { src: null, gain: { gain: { setTargetAtTime: ()=>{} } } };
-  activeNodes.push(sentinel);
-
-  (function chord() {
-    if (!activeNodes.includes(sentinel)) return;
-    chords[ci % chords.length].forEach(f => {
-      const o = ctx.createOscillator(), eg = ctx.createGain();
-      const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 900;
-      o.type = 'triangle'; o.frequency.value = f;
-      eg.gain.setValueAtTime(0, ctx.currentTime);
-      eg.gain.linearRampToValueAtTime(0.055, ctx.currentTime+0.35);
-      eg.gain.setValueAtTime(0.055, ctx.currentTime+1.4);
-      eg.gain.linearRampToValueAtTime(0, ctx.currentTime+2.8);
-      o.connect(lp); lp.connect(eg); eg.connect(masterGain);
-      o.start(); o.stop(ctx.currentTime+2.9);
+// ─── INSTRUMENTAL ──────────────────────────────────────────────
+GENERATORS['lofi'] = (c, o) => {
+  const hs=ns(c,'white'), hg=c.createGain(), hp=bq(c,'highpass',5000);
+  hg.gain.value=.016; hs.connect(hp); hp.connect(hg); hg.connect(o); hs.start();
+  const chords=[[130.8,164.8,196,246.9],[110,130.8,164.8,196],[87.31,110,130.8,164.8],[98,123.5,146.8,185]];
+  let ci=0, on=true;
+  const chord = () => {
+    if (!on) return;
+    chords[ci%4].forEach(f => {
+      const ob=c.createOscillator(), eg=c.createGain(), lp=bq(c,'lowpass',900);
+      ob.type='triangle'; ob.frequency.value=f;
+      eg.gain.setValueAtTime(0,c.currentTime); eg.gain.linearRampToValueAtTime(.05,c.currentTime+.35); eg.gain.setValueAtTime(.05,c.currentTime+1.4); eg.gain.linearRampToValueAtTime(0,c.currentTime+2.8);
+      ob.connect(lp); lp.connect(eg); eg.connect(o); ob.start(); ob.stop(c.currentTime+2.9);
     });
-    ci++;
-    setTimeout(chord, 3000);
-  })();
-}
+    ci++; setTimeout(chord, 3000);
+  };
+  chord(); return () => { on=false; tryStop(hs); };
+};
 
-// Forest
-function startForest(ctx) {
-  const ws  = noiseSource(ctx, 'pink');
-  const wg  = ctx.createGain(); wg.gain.value = 0;
-  const lpf = ctx.createBiquadFilter(); lpf.type = 'lowpass'; lpf.frequency.value = 500;
-  ws.connect(lpf); lpf.connect(wg); wg.connect(masterGain);
-  ws.start(); wg.gain.setTargetAtTime(0.38, ctx.currentTime, 1); reg(ws, wg);
+GENERATORS['piano'] = (c, o) => {
+  // Pentatonic C major scale
+  const notes=[261.63,293.66,329.63,392,440,523.25,587.33,659.25];
+  let on=true;
+  const note = () => {
+    if (!on) return;
+    const f=notes[Math.floor(R()*notes.length)];
+    const ob=c.createOscillator(), eg=c.createGain();
+    ob.type='sine'; ob.frequency.value=f;
+    eg.gain.setValueAtTime(0,c.currentTime); eg.gain.linearRampToValueAtTime(.065,c.currentTime+.02); eg.gain.exponentialRampToValueAtTime(.001,c.currentTime+2);
+    ob.connect(eg); eg.connect(o); ob.start(); ob.stop(c.currentTime+2.2);
+    // 2nd harmonic
+    const ob2=c.createOscillator(), eg2=c.createGain();
+    ob2.type='sine'; ob2.frequency.value=f*2;
+    eg2.gain.setValueAtTime(0,c.currentTime); eg2.gain.linearRampToValueAtTime(.016,c.currentTime+.01); eg2.gain.exponentialRampToValueAtTime(.001,c.currentTime+.9);
+    ob2.connect(eg2); eg2.connect(o); ob2.start(); ob2.stop(c.currentTime+1);
+    setTimeout(note, 650+R()*1300);
+  };
+  note(); return () => { on=false; };
+};
 
-  (function bird() {
-    if (!activeNodes.length) return;
-    const n = 2 + Math.floor(Math.random()*3);
-    for (let i = 0; i < n; i++) {
-      setTimeout(() => {
-        const o = ctx.createOscillator(), bg = ctx.createGain();
-        const fr = 1600 + Math.random()*1400;
-        o.type = 'sine';
-        o.frequency.setValueAtTime(fr, ctx.currentTime);
-        o.frequency.linearRampToValueAtTime(fr*1.25, ctx.currentTime+0.09);
-        o.frequency.linearRampToValueAtTime(fr, ctx.currentTime+0.18);
-        bg.gain.setValueAtTime(0, ctx.currentTime);
-        bg.gain.linearRampToValueAtTime(0.045, ctx.currentTime+0.02);
-        bg.gain.linearRampToValueAtTime(0, ctx.currentTime+0.2);
-        o.connect(bg); bg.connect(masterGain);
-        o.start(); o.stop(ctx.currentTime+0.22);
-      }, i*160);
-    }
-    setTimeout(bird, 1800 + Math.random()*3800);
-  })();
-}
+GENERATORS['guitar'] = (c, o) => {
+  // Am arpeggio
+  const arp=[110,164.81,220,261.63,329.63,440];
+  let on=true, idx=0;
+  const pluck = () => {
+    if (!on) return;
+    const f=arp[idx%arp.length], ob=c.createOscillator(), eg=c.createGain(), lp=bq(c,'lowpass',1800);
+    ob.type='sawtooth'; ob.frequency.value=f;
+    eg.gain.setValueAtTime(.055,c.currentTime); eg.gain.exponentialRampToValueAtTime(.001,c.currentTime+1.4);
+    ob.connect(lp); lp.connect(eg); eg.connect(o); ob.start(); ob.stop(c.currentTime+1.5);
+    idx++; setTimeout(pluck, 360+R()*80);
+  };
+  pluck(); return () => { on=false; };
+};
 
-// Ocean
-function startOcean(ctx) {
-  const src = noiseSource(ctx, 'pink');
-  const g   = ctx.createGain(); g.gain.value = 0;
-  const lpf = ctx.createBiquadFilter(); lpf.type = 'lowpass'; lpf.frequency.value = 800;
-  src.connect(lpf); lpf.connect(g); g.connect(masterGain);
-  src.start(); reg(src, g);
-  let ph = 0;
+// ─── NOISE ─────────────────────────────────────────────────────
+GENERATORS['white-noise'] = (c, o) => { const s=ns(c,'white'); s.connect(o); s.start(); return () => tryStop(s); };
+GENERATORS['brown-noise'] = (c, o) => { const s=ns(c,'brown'), l=bq(c,'lowpass',280); s.connect(l); l.connect(o); s.start(); return () => tryStop(s); };
+GENERATORS['pink-noise']  = (c, o) => { const s=ns(c,'pink');  s.connect(o); s.start(); return () => tryStop(s); };
 
-  (function wave() {
-    if (!activeNodes.find(n => n.src === src)) return;
-    const t = ctx.currentTime, dur = 3.2 + Math.random()*1.2;
-    g.gain.cancelScheduledValues(t);
-    if (ph % 2 === 0) {
-      g.gain.setValueAtTime(0.08, t);
-      g.gain.linearRampToValueAtTime(0.62, t + dur*0.38);
-      g.gain.linearRampToValueAtTime(0.1,  t + dur);
-    } else {
-      g.gain.setValueAtTime(0.1, t);
-      g.gain.linearRampToValueAtTime(0.04, t + dur);
-    }
-    ph++;
-    setTimeout(wave, dur*1000);
-  })();
-}
+// ═══════════════════════════════════════════════════════════════
+//  SOUND CATALOGUE  (tabs + cards)
+// ═══════════════════════════════════════════════════════════════
+const CATEGORIES = [
+  { id:'rain',         label:'🌧 Rain',         sounds:[
+    { id:'light-rain',     name:'Light Rain',      icon:'🌦' },
+    { id:'heavy-rain',     name:'Heavy Rain',      icon:'⛈' },
+    { id:'rain-window',    name:'Rain on Window',  icon:'🪟' },
+    { id:'rain-roof',      name:'Rain on Roof',    icon:'🏠' },
+    { id:'rain-thunder',   name:'Rain + Thunder',  icon:'⚡' },
+    { id:'distant-thunder',name:'Distant Thunder', icon:'🌩' },
+  ]},
+  { id:'nature',       label:'🌿 Nature',        sounds:[
+    { id:'forest',  name:'Forest',        icon:'🌲' },
+    { id:'wind',    name:'Wind in Trees', icon:'🍃' },
+    { id:'ocean',   name:'Ocean Waves',   icon:'🌊' },
+    { id:'river',   name:'River / Stream',icon:'💧' },
+    { id:'birds',   name:'Birds',         icon:'🐦' },
+  ]},
+  { id:'zen',          label:'🧘 Zen',            sounds:[
+    { id:'alpha',  name:'Alpha Waves', icon:'🧠' },
+    { id:'theta',  name:'Theta Waves', icon:'✨' },
+    { id:'chimes', name:'Soft Chimes', icon:'🔔' },
+  ]},
+  { id:'city',         label:'🌆 City',           sounds:[
+    { id:'traffic',    name:'Distant Traffic',  icon:'🚗' },
+    { id:'night-city', name:'Night City',        icon:'🌃' },
+    { id:'street',     name:'Street Noise',      icon:'🏙' },
+    { id:'subway',     name:'Subway',            icon:'🚇' },
+  ]},
+  { id:'cafe',         label:'☕ Cafe',            sounds:[
+    { id:'coffee',  name:'Coffee Shop',    icon:'☕' },
+    { id:'library', name:'Library',        icon:'📚' },
+    { id:'typing',  name:'Keyboard Typing',icon:'⌨️' },
+  ]},
+  { id:'office',       label:'🏢 Office',          sounds:[
+    { id:'office-chat', name:'Office Chatter',   icon:'💼' },
+    { id:'kb-cluster',  name:'Keyboard Cluster', icon:'🖥️' },
+    { id:'printer',     name:'Printer / Scanner',icon:'🖨️' },
+    { id:'movement',    name:'Light Movement',   icon:'👣' },
+  ]},
+  { id:'travel',       label:'✈️ Travel',          sounds:[
+    { id:'airplane', name:'Airplane Cabin', icon:'✈️' },
+    { id:'train',    name:'Train Ride',     icon:'🚂' },
+    { id:'bus',      name:'Bus',            icon:'🚌' },
+  ]},
+  { id:'cozy',         label:'🔥 Cozy',            sounds:[
+    { id:'fireplace', name:'Fireplace',        icon:'🔥' },
+    { id:'rain-fire', name:'Rain + Fireplace', icon:'🌧' },
+    { id:'cabin',     name:'Cabin Ambience',   icon:'🛖' },
+  ]},
+  { id:'instrumental', label:'🎹 Instrumental',    sounds:[
+    { id:'lofi',   name:'Lo-fi Beats',    icon:'🎵' },
+    { id:'piano',  name:'Piano Loops',    icon:'🎹' },
+    { id:'guitar', name:'Ambient Guitar', icon:'🎸' },
+  ]},
+  { id:'noise',        label:'🔇 Noise',           sounds:[
+    { id:'white-noise', name:'White Noise', icon:'⬜' },
+    { id:'brown-noise', name:'Brown Noise', icon:'🟫' },
+    { id:'pink-noise',  name:'Pink Noise',  icon:'🟪' },
+  ]},
+];
 
-const soundMap = { rain: startRain, lofi: startLofi, forest: startForest, ocean: startOcean };
+// Flat id→info lookup
+const SOUND_INFO = new Map();
+CATEGORIES.forEach(cat => cat.sounds.forEach(s => SOUND_INFO.set(s.id, s)));
 
-document.querySelectorAll('.sound-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const s = btn.dataset.sound;
-    if (currentSound === s) {
-      stopAll();
-      document.querySelectorAll('.sound-btn').forEach(b => b.classList.remove('active'));
-      return;
-    }
-    stopAll();
-    document.querySelectorAll('.sound-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    currentSound = s;
-    soundMap[s](getCtx());
+// ═══════════════════════════════════════════════════════════════
+//  BUILD MODAL DOM
+// ═══════════════════════════════════════════════════════════════
+function buildModal() {
+  const tabsEl = document.getElementById('smTabs');
+  const gridEl = document.getElementById('smGrid');
+
+  CATEGORIES.forEach((cat, ci) => {
+    // Tab
+    const tab = document.createElement('button');
+    tab.className = 'sm-tab' + (ci===0?' active':'');
+    tab.dataset.tab = cat.id;
+    tab.textContent = cat.label;
+    tabsEl.appendChild(tab);
+
+    // Panel
+    const panel = document.createElement('div');
+    panel.className = 'sm-panel' + (ci===0?' active':'');
+    panel.dataset.panel = cat.id;
+
+    cat.sounds.forEach(sound => {
+      const card = document.createElement('div');
+      card.className = 'sound-card';
+      card.dataset.sound = sound.id;
+      card.innerHTML = `
+        <div class="sc-top">
+          <span class="sc-icon">${sound.icon}</span>
+          <span class="sc-name">${sound.name}</span>
+          <button class="sc-toggle" title="Toggle"></button>
+        </div>
+        <input type="range" class="sc-vol" min="0" max="1" step="0.01" value="0.5" data-sound="${sound.id}">
+      `;
+
+      // Click card body (not slider) → toggle
+      card.addEventListener('click', e => {
+        if (e.target.classList.contains('sc-vol')) return;
+        const vol = parseFloat(card.querySelector('.sc-vol').value);
+        toggleSound(sound.id, vol);
+      });
+
+      // Slider → adjust volume
+      card.querySelector('.sc-vol').addEventListener('input', e => {
+        e.stopPropagation();
+        const vol = parseFloat(e.target.value);
+        setSoundVol(sound.id, vol);
+        // Sync mix panel slider
+        const mixSlider = document.querySelector(`.asi-vol[data-sound="${sound.id}"]`);
+        if (mixSlider) mixSlider.value = vol;
+      });
+
+      panel.appendChild(card);
+    });
+    gridEl.appendChild(panel);
   });
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  UI UPDATE
+// ═══════════════════════════════════════════════════════════════
+function updateSoundUI() {
+  // Header badge
+  const cnt   = activeSounds.size;
+  const badge = document.getElementById('soundsBadge');
+  badge.textContent = cnt || '';
+  badge.classList.toggle('visible', cnt > 0);
+
+  // Sound cards active state + slider value
+  document.querySelectorAll('.sound-card').forEach(card => {
+    const id = card.dataset.sound;
+    const active = activeSounds.has(id);
+    card.classList.toggle('active', active);
+    if (active) card.querySelector('.sc-vol').value = activeSounds.get(id).vol;
+  });
+
+  // Mix panel
+  renderMix();
+}
+
+function renderMix() {
+  const list = document.getElementById('mixList');
+  list.innerHTML = '';
+  if (activeSounds.size === 0) {
+    list.innerHTML = '<p class="mix-empty">No sounds active</p>'; return;
+  }
+  activeSounds.forEach((data, id) => {
+    const info = SOUND_INFO.get(id) || { name: id, icon: '♪' };
+    const item  = document.createElement('div');
+    item.className = 'asi';
+    item.innerHTML = `
+      <div class="asi-top">
+        <span class="asi-icon">${info.icon}</span>
+        <span class="asi-name">${info.name}</span>
+        <button class="asi-remove" data-sound="${id}" title="Remove">✕</button>
+      </div>
+      <input type="range" class="asi-vol" min="0" max="1" step="0.01" value="${data.vol}" data-sound="${id}">
+    `;
+    // Mix panel slider → adjust volume
+    item.querySelector('.asi-vol').addEventListener('input', e => {
+      const vol = parseFloat(e.target.value);
+      setSoundVol(id, vol);
+      // Sync card slider
+      const cardSlider = document.querySelector(`.sound-card[data-sound="${id}"] .sc-vol`);
+      if (cardSlider) cardSlider.value = vol;
+    });
+    // Remove button
+    item.querySelector('.asi-remove').addEventListener('click', () => removeSound(id));
+    list.appendChild(item);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  PRESETS
+// ═══════════════════════════════════════════════════════════════
+let presets = JSON.parse(localStorage.getItem('focus-presets') || '[]');
+
+function savePreset(name) {
+  if (!name.trim() || activeSounds.size === 0) return;
+  const sounds = [...activeSounds.entries()].map(([id, {vol}]) => ({id, vol}));
+  presets = presets.filter(p => p.name !== name.trim());
+  presets.push({ name: name.trim(), sounds });
+  localStorage.setItem('focus-presets', JSON.stringify(presets));
+  renderPresets();
+}
+
+function loadPreset(name) {
+  const preset = presets.find(p => p.name === name);
+  if (!preset) return;
+  [...activeSounds.keys()].forEach(id => removeSound(id));
+  // Small delay so fades don't conflict
+  setTimeout(() => preset.sounds.forEach(({id, vol}) => addSound(id, vol)), 400);
+}
+
+function deletePreset(name) {
+  presets = presets.filter(p => p.name !== name);
+  localStorage.setItem('focus-presets', JSON.stringify(presets));
+  renderPresets();
+}
+
+function renderPresets() {
+  const list = document.getElementById('presetList');
+  list.innerHTML = '';
+  if (presets.length === 0) {
+    list.innerHTML = '<p class="mix-empty" style="margin-bottom:0">No presets saved</p>';
+    return;
+  }
+  presets.forEach(p => {
+    const row = document.createElement('div');
+    row.className = 'preset-row';
+    row.innerHTML = `
+      <button class="preset-load-btn" title="Load: ${p.name}">${p.name}</button>
+      <button class="preset-del-btn" title="Delete">✕</button>
+    `;
+    row.querySelector('.preset-load-btn').addEventListener('click', () => loadPreset(p.name));
+    row.querySelector('.preset-del-btn').addEventListener('click', () => deletePreset(p.name));
+    list.appendChild(row);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  MODAL OPEN / CLOSE
+// ═══════════════════════════════════════════════════════════════
+const soundModal = document.getElementById('soundModal');
+
+function openModal()  { soundModal.classList.remove('hidden'); }
+function closeModal() { soundModal.classList.add('hidden'); }
+
+document.getElementById('soundsBtn').addEventListener('click', openModal);
+document.getElementById('smClose').addEventListener('click', closeModal);
+document.getElementById('smBackdrop').addEventListener('click', closeModal);
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+// Tab switching
+document.getElementById('smTabs').addEventListener('click', e => {
+  const btn = e.target.closest('.sm-tab');
+  if (!btn) return;
+  document.querySelectorAll('.sm-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.sm-panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelector(`.sm-panel[data-panel="${btn.dataset.tab}"]`).classList.add('active');
 });
 
-document.getElementById('volSlider').addEventListener('input', e => {
+// Master volume
+document.getElementById('masterVolSlider').addEventListener('input', e => {
   if (masterGain) masterGain.gain.value = parseFloat(e.target.value);
 });
 
-// ─────────────────────────────────────────────────
+// Preset save
+document.getElementById('presetSaveBtn').addEventListener('click', () => {
+  const input = document.getElementById('presetNameInput');
+  savePreset(input.value);
+  input.value = '';
+});
+document.getElementById('presetNameInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    savePreset(e.target.value); e.target.value = '';
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════
 //  TASK LIST
-// ─────────────────────────────────────────────────
-let tasks = [];
+// ═══════════════════════════════════════════════════════════════
+let tasks = JSON.parse(localStorage.getItem('focus-tasks') || '[]');
 const taskInput  = document.getElementById('taskInput');
 const taskAddBtn = document.getElementById('taskAddBtn');
 const taskList   = document.getElementById('taskList');
+
+function saveTasks()  { localStorage.setItem('focus-tasks', JSON.stringify(tasks)); }
 
 function renderTasks() {
   taskList.innerHTML = '';
@@ -935,32 +1508,30 @@ function renderTasks() {
   });
 }
 
-function escHtml(s) {
-  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 function addTask() {
   const v = taskInput.value.trim();
   if (!v) return;
-  tasks.push({ text: v, done: false });
-  taskInput.value = '';
-  renderTasks();
+  tasks.push({ text: v, done: false }); taskInput.value = '';
+  saveTasks(); renderTasks();
 }
 
 taskAddBtn.addEventListener('click', addTask);
-taskInput.addEventListener('keydown', e => { if (e.key === 'Enter') addTask(); });
-
+taskInput.addEventListener('keydown', e => { if (e.key==='Enter') addTask(); });
 taskList.addEventListener('click', e => {
   const i = parseInt(e.target.dataset.i);
   if (isNaN(i)) return;
-  if (e.target.classList.contains('task-check')) {
-    tasks[i].done = !tasks[i].done;
-    renderTasks();
-  } else if (e.target.classList.contains('task-del')) {
-    tasks.splice(i, 1);
-    renderTasks();
-  }
+  if (e.target.classList.contains('task-check')) { tasks[i].done = !tasks[i].done; saveTasks(); renderTasks(); }
+  else if (e.target.classList.contains('task-del'))  { tasks.splice(i,1); saveTasks(); renderTasks(); }
 });
+
+// ═══════════════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════════════
+buildModal();
+renderPresets();
+renderTasks();
 </script>
 </body>
 </html>
