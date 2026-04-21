@@ -1171,6 +1171,54 @@ document.getElementById('presetNameInput').addEventListener('keydown',e=>{if(e.k
 // ═══════════════════════════════════════════════════════════════
 //  TASK LIST
 // ═══════════════════════════════════════════════════════════════
+// ── Task tab helpers ───────────────────────────
+let activeTab = 'inbox';
+
+function isThisWeek(dueDate, today) {
+  if (!dueDate || dueDate <= today) return false;
+  const max = new Date();
+  max.setDate(max.getDate() + 7);
+  return dueDate <= max.toISOString().slice(0, 10);
+}
+
+function getTaskTab(task) {
+  if (task.done) return 'done';
+  if (!task.dueDate) return 'inbox';
+  const today = new Date().toISOString().slice(0, 10);
+  if (task.dueDate === today) return 'today';
+  if (isThisWeek(task.dueDate, today)) return 'week';
+  return 'inbox'; // overdue OR more than 7 days away — show in inbox with chip
+}
+
+function formatDate(iso) {
+  const [, m, d] = iso.split('-');
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return `${months[parseInt(m, 10) - 1]} ${parseInt(d, 10)}`;
+}
+
+function dueDateHtml(task, i) {
+  if (!task.dueDate) {
+    return `<button class="task-date-btn" data-i="${i}" title="Set due date">📅</button><input type="date" class="task-date-input" data-i="${i}" value="">`;
+  }
+  const today = new Date().toISOString().slice(0, 10);
+  const overdue = task.dueDate < today;
+  const chipCls = overdue ? 'task-date-chip overdue' : 'task-date-chip';
+  const chipText = overdue ? `${formatDate(task.dueDate)} ⚠` : formatDate(task.dueDate);
+  return `<button class="${chipCls}" data-i="${i}">${chipText}</button><input type="date" class="task-date-input" data-i="${i}" value="${task.dueDate}">`;
+}
+
+function renderTabBadges() {
+  const today = new Date().toISOString().slice(0, 10);
+  const todayCount = tasks.filter(t => !t.done && t.dueDate === today).length;
+  const weekCount  = tasks.filter(t => !t.done && isThisWeek(t.dueDate, today)).length;
+  const tb = document.getElementById('tab-badge-today');
+  const wb = document.getElementById('tab-badge-week');
+  tb.textContent = todayCount || '';
+  tb.classList.toggle('visible', todayCount > 0);
+  wb.textContent = weekCount || '';
+  wb.classList.toggle('visible', weekCount > 0);
+}
+
 let tasks=JSON.parse(localStorage.getItem('focus-tasks')||'[]');
 const taskInput=document.getElementById('taskInput'), taskAddBtn=document.getElementById('taskAddBtn'), taskList=document.getElementById('taskList');
 function saveTasks(){localStorage.setItem('focus-tasks',JSON.stringify(tasks));}
