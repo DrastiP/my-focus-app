@@ -671,10 +671,18 @@ input[type=range]::-moz-range-thumb { width:14px;height:14px;border:none;border-
 
   <div class="sidebar">
     <div class="panel tasks-panel">
-      <div class="panel-label">Tasks</div>
+      <div class="task-tabs" id="taskTabs">
+        <button class="task-tab active" data-tab="inbox">📥 Inbox</button>
+        <button class="task-tab" data-tab="today">☀️ Today <span class="tab-badge" id="tab-badge-today"></span></button>
+        <button class="task-tab" data-tab="week">📅 Week <span class="tab-badge" id="tab-badge-week"></span></button>
+        <button class="task-tab" data-tab="done">✓ Done</button>
+      </div>
       <div class="task-input-row">
         <input class="task-field" id="taskInput" placeholder="What are you working on?" maxlength="80">
         <button class="task-add" id="taskAddBtn">+</button>
+      </div>
+      <div class="task-clear-row" id="taskClearRow" style="display:none">
+        <button class="task-clear-all" id="clearDoneBtn">Clear all</button>
       </div>
       <ul class="task-list" id="taskList"></ul>
     </div>
