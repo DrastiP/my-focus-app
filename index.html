@@ -1270,6 +1270,12 @@ document.getElementById('taskTabs').addEventListener('click', e => {
   renderTasks();
 });
 
+document.getElementById('clearDoneBtn').addEventListener('click', () => {
+  tasks = tasks.filter(t => !t.done);
+  saveTasks();
+  renderTasks();
+});
+
 // ═══════════════════════════════════════════════════════════════
 //  INIT
 // ═══════════════════════════════════════════════════════════════
