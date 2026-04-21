@@ -1239,6 +1239,13 @@ function addTask(){const v=taskInput.value.trim();if(!v)return;tasks.push({text:
 taskAddBtn.addEventListener('click',addTask);
 taskInput.addEventListener('keydown',e=>{if(e.key==='Enter')addTask();});
 taskList.addEventListener('click',e=>{const i=parseInt(e.target.dataset.i);if(isNaN(i))return;if(e.target.classList.contains('task-check')){tasks[i].done=!tasks[i].done;saveTasks();renderTasks();}else if(e.target.classList.contains('task-del')){tasks.splice(i,1);saveTasks();renderTasks();}});
+document.getElementById('taskTabs').addEventListener('click', e => {
+  const btn = e.target.closest('.task-tab');
+  if (!btn) return;
+  activeTab = btn.dataset.tab;
+  document.querySelectorAll('.task-tab').forEach(t => t.classList.toggle('active', t === btn));
+  renderTasks();
+});
 
 // ═══════════════════════════════════════════════════════════════
 //  INIT
