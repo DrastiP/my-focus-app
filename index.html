@@ -1238,7 +1238,30 @@ function renderTasks() {
 function addTask(){const v=taskInput.value.trim();if(!v)return;tasks.push({text:v,done:false});taskInput.value='';saveTasks();renderTasks();}
 taskAddBtn.addEventListener('click',addTask);
 taskInput.addEventListener('keydown',e=>{if(e.key==='Enter')addTask();});
-taskList.addEventListener('click',e=>{const i=parseInt(e.target.dataset.i);if(isNaN(i))return;if(e.target.classList.contains('task-check')){tasks[i].done=!tasks[i].done;saveTasks();renderTasks();}else if(e.target.classList.contains('task-del')){tasks.splice(i,1);saveTasks();renderTasks();}});
+taskList.addEventListener('click', e => {
+  if (e.target.classList.contains('task-date-btn') || e.target.classList.contains('task-date-chip')) {
+    const i = parseInt(e.target.dataset.i);
+    if (isNaN(i)) return;
+    const input = taskList.querySelector(`.task-date-input[data-i="${i}"]`);
+    if (input) { try { input.showPicker(); } catch(_) { input.click(); } }
+    return;
+  }
+  const i = parseInt(e.target.dataset.i);
+  if (isNaN(i)) return;
+  if (e.target.classList.contains('task-check')) {
+    tasks[i].done = !tasks[i].done; saveTasks(); renderTasks();
+  } else if (e.target.classList.contains('task-del')) {
+    tasks.splice(i, 1); saveTasks(); renderTasks();
+  }
+});
+taskList.addEventListener('change', e => {
+  if (!e.target.classList.contains('task-date-input')) return;
+  const i = parseInt(e.target.dataset.i);
+  if (isNaN(i)) return;
+  tasks[i].dueDate = e.target.value || null;
+  saveTasks();
+  renderTasks();
+});
 document.getElementById('taskTabs').addEventListener('click', e => {
   const btn = e.target.closest('.task-tab');
   if (!btn) return;
