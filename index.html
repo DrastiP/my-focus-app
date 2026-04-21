@@ -1222,8 +1222,19 @@ function renderTabBadges() {
 let tasks=JSON.parse(localStorage.getItem('focus-tasks')||'[]');
 const taskInput=document.getElementById('taskInput'), taskAddBtn=document.getElementById('taskAddBtn'), taskList=document.getElementById('taskList');
 function saveTasks(){localStorage.setItem('focus-tasks',JSON.stringify(tasks));}
-function renderTasks(){taskList.innerHTML='';tasks.forEach((t,i)=>{const li=document.createElement('li');li.className='task-item';li.innerHTML=`<button class="task-check${t.done?' done':''}" data-i="${i}">${t.done?'✓':''}</button><span class="task-text${t.done?' done':''}">${escHtml(t.text)}</span><button class="task-del" data-i="${i}" title="Remove">✕</button>`;taskList.appendChild(li);});}
-function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function renderTasks() {
+  const clearRow = document.getElementById('taskClearRow');
+  if (clearRow) clearRow.style.display = activeTab === 'done' ? 'flex' : 'none';
+  taskList.innerHTML = '';
+  tasks.forEach((t, i) => {
+    if (getTaskTab(t) !== activeTab) return;
+    const li = document.createElement('li');
+    li.className = 'task-item';
+    li.innerHTML = `<button class="task-check${t.done ? ' done' : ''}" data-i="${i}">${t.done ? '✓' : ''}</button><span class="task-text${t.done ? ' done' : ''}">${escHtml(t.text)}</span>${t.done ? '' : dueDateHtml(t, i)}<button class="task-del" data-i="${i}" title="Remove">✕</button>`;
+    taskList.appendChild(li);
+  });
+  renderTabBadges();
+}function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function addTask(){const v=taskInput.value.trim();if(!v)return;tasks.push({text:v,done:false});taskInput.value='';saveTasks();renderTasks();}
 taskAddBtn.addEventListener('click',addTask);
 taskInput.addEventListener('keydown',e=>{if(e.key==='Enter')addTask();});
