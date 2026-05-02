@@ -1155,44 +1155,257 @@ function toggleSound(id,vol) { activeSounds.has(id)?removeSound(id):addSound(id,
 const GENERATORS={};
 function rainBase(c,o,nt,hp,lp){ const s=ns(c,nt),h=bq(c,'highpass',hp),l=bq(c,'lowpass',lp,.4); s.connect(h);h.connect(l);l.connect(o);s.start();return s; }
 
-GENERATORS['light-rain']=(c,o)=>{const s=rainBase(c,o,'white',300,1400);let on=true;const d=()=>{if(!on)return;pulse(c,o,'sine',700+R()*500,.055,.14);setTimeout(d,900+R()*1500);};d();return()=>{on=false;tryStop(s);};};
-GENERATORS['rain-window']=(c,o)=>{const s=rainBase(c,o,'white',600,3000);let on=true;const t=()=>{if(!on)return;const f=900+R()*1100,oo=c.createOscillator(),g=c.createGain();oo.type='triangle';oo.frequency.setValueAtTime(f,c.currentTime);oo.frequency.exponentialRampToValueAtTime(f*.8,c.currentTime+.12);g.gain.setValueAtTime(.08,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.18);oo.connect(g);g.connect(o);oo.start();oo.stop(c.currentTime+.2);setTimeout(t,350+R()*1000);};t();return()=>{on=false;tryStop(s);};};
-GENERATORS['distant-thunder']=(c,o)=>{const s=ns(c,'pink'),l=bq(c,'lowpass',180,.5);s.connect(l);l.connect(o);s.start();let on=true;const b=()=>{if(!on)return;const ro=c.createOscillator(),rg=c.createGain();ro.type='sine';ro.frequency.value=28+R()*35;rg.gain.setValueAtTime(0,c.currentTime);rg.gain.linearRampToValueAtTime(.18,c.currentTime+.4);rg.gain.exponentialRampToValueAtTime(.001,c.currentTime+3.5);ro.connect(rg);rg.connect(o);ro.start();ro.stop(c.currentTime+4);setTimeout(b,8000+R()*9000);};b();return()=>{on=false;tryStop(s);};};
-GENERATORS['forest']=(c,o)=>{const s=ns(c,'pink'),l=bq(c,'lowpass',500);s.connect(l);l.connect(o);s.start();let on=true;const bird=()=>{if(!on)return;const n=2+Math.floor(R()*3);for(let i=0;i<n;i++)setTimeout(()=>{if(!on)return;const f=1600+R()*1400,ob=c.createOscillator(),bg=c.createGain();ob.type='sine';ob.frequency.setValueAtTime(f,c.currentTime);ob.frequency.linearRampToValueAtTime(f*1.25,c.currentTime+.09);ob.frequency.linearRampToValueAtTime(f,c.currentTime+.18);bg.gain.setValueAtTime(0,c.currentTime);bg.gain.linearRampToValueAtTime(.04,c.currentTime+.02);bg.gain.linearRampToValueAtTime(0,c.currentTime+.2);ob.connect(bg);bg.connect(o);ob.start();ob.stop(c.currentTime+.22);},i*160);setTimeout(bird,1800+R()*3800);};bird();return()=>{on=false;tryStop(s);};};
-GENERATORS['wind']=(c,o)=>{const wg=c.createGain(),s=ns(c,'pink'),h=bq(c,'highpass',80),l=bq(c,'lowpass',600);s.connect(h);h.connect(l);l.connect(wg);wg.connect(o);s.start();const lfo=c.createOscillator(),lg=c.createGain();lfo.type='sine';lfo.frequency.value=.1;lg.gain.value=.22;lfo.connect(lg);lg.connect(wg.gain);wg.gain.value=.35;lfo.start();return()=>{tryStop(s);tryStop(lfo);};};
-GENERATORS['ocean']=(c,o)=>{const wg=c.createGain(),s=ns(c,'pink'),l=bq(c,'lowpass',800);wg.gain.value=.1;s.connect(l);l.connect(wg);wg.connect(o);s.start();let on=true,ph=0;const wave=()=>{if(!on)return;const t=c.currentTime,dur=3.5+R()*1.5;wg.gain.cancelScheduledValues(t);if(ph%2===0){wg.gain.setValueAtTime(.08,t);wg.gain.linearRampToValueAtTime(.75,t+dur*.4);wg.gain.linearRampToValueAtTime(.1,t+dur);}else{wg.gain.setValueAtTime(.1,t);wg.gain.linearRampToValueAtTime(.06,t+dur);}ph++;setTimeout(wave,dur*1000);};wave();return()=>{on=false;tryStop(s);};};
+GENERATORS['light-rain']=(c,o)=>{
+  // Gentle hiss bed
+  const bed=ns(c,'white'),hp=bq(c,'highpass',1400),lp=bq(c,'lowpass',5000),bg=c.createGain();bg.gain.value=0.032;bed.connect(hp);hp.connect(lp);lp.connect(bg);bg.connect(o);bed.start();
+  let on=true;const drip=()=>{if(!on)return;
+    // Noise burst (realistic drop impact)
+    const s2=ns(c,'white'),h=bq(c,'bandpass',1600+R()*1200,3.5),g=c.createGain();g.gain.setValueAtTime(.13,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.038);s2.connect(h);h.connect(g);g.connect(o);s2.start();s2.stop(c.currentTime+.055);
+    // Soft ring-down after impact
+    const ob=c.createOscillator(),og=c.createGain();ob.type='sine';ob.frequency.setValueAtTime(700+R()*400,c.currentTime);ob.frequency.exponentialRampToValueAtTime(300+R()*100,c.currentTime+.22);og.gain.setValueAtTime(.018,c.currentTime);og.gain.exponentialRampToValueAtTime(.001,c.currentTime+.28);ob.connect(og);og.connect(o);ob.start();ob.stop(c.currentTime+.3);
+    setTimeout(drip,750+R()*1600);};drip();return()=>{on=false;tryStop(bed);};
+};GENERATORS['rain-window']=(c,o)=>{
+  // Subtle condensation hiss on glass
+  const bed=ns(c,'white'),hp=bq(c,'highpass',1800),lp=bq(c,'lowpass',6000),bg=c.createGain();bg.gain.value=0.025;bed.connect(hp);hp.connect(lp);lp.connect(bg);bg.connect(o);bed.start();
+  let on=true;const tap=()=>{if(!on)return;const f=600+R()*500;
+    // Impact noise burst
+    const s2=ns(c,'white'),h=bq(c,'bandpass',f*2.2,4),g=c.createGain();g.gain.setValueAtTime(.09,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.025);s2.connect(h);h.connect(g);g.connect(o);s2.start();s2.stop(c.currentTime+.04);
+    // Glass fundamental ring
+    const ob=c.createOscillator(),og=c.createGain();ob.type='sine';ob.frequency.value=f;og.gain.setValueAtTime(.07,c.currentTime);og.gain.exponentialRampToValueAtTime(.001,c.currentTime+.55);ob.connect(og);og.connect(o);ob.start();ob.stop(c.currentTime+.6);
+    // Glass 2nd partial (inharmonic)
+    const ob2=c.createOscillator(),og2=c.createGain();ob2.type='sine';ob2.frequency.value=f*1.68;og2.gain.setValueAtTime(.025,c.currentTime);og2.gain.exponentialRampToValueAtTime(.001,c.currentTime+.22);ob2.connect(og2);og2.connect(o);ob2.start();ob2.stop(c.currentTime+.26);
+    // Glass 3rd partial
+    const ob3=c.createOscillator(),og3=c.createGain();ob3.type='sine';ob3.frequency.value=f*3.1;og3.gain.setValueAtTime(.009,c.currentTime);og3.gain.exponentialRampToValueAtTime(.001,c.currentTime+.08);ob3.connect(og3);og3.connect(o);ob3.start();ob3.stop(c.currentTime+.1);
+    setTimeout(tap,420+R()*1100);};tap();return()=>{on=false;tryStop(bed);};
+};GENERATORS['distant-thunder']=(c,o)=>{
+  const bed=ns(c,'pink'),l=bq(c,'lowpass',140,.5),bg=c.createGain();bg.gain.value=0.03;bed.connect(l);l.connect(bg);bg.connect(o);bed.start();
+  let on=true;const rumble=()=>{if(!on)return;
+    // Multi-frequency low rumble
+    [22+R()*12,34+R()*10].forEach((f,i)=>{const ro=c.createOscillator(),rg=c.createGain();ro.type='sine';ro.frequency.value=f;rg.gain.setValueAtTime(0,c.currentTime);rg.gain.linearRampToValueAtTime([.18,.09][i],c.currentTime+.7+i*.3);rg.gain.exponentialRampToValueAtTime(.001,c.currentTime+5+i*1.2);ro.connect(rg);rg.connect(o);ro.start();ro.stop(c.currentTime+6.5);});
+    // Low noise bloom
+    const wn=ns(c,'pink'),wl=bq(c,'lowpass',120),wg=c.createGain();wg.gain.setValueAtTime(0,c.currentTime);wg.gain.linearRampToValueAtTime(.12,c.currentTime+.5);wg.gain.exponentialRampToValueAtTime(.001,c.currentTime+4.5);wn.connect(wl);wl.connect(wg);wg.connect(o);wn.start();wn.stop(c.currentTime+5);
+    // Occasional far lightning crack (brief, rare)
+    if(R()<.4){const cr=ns(c,'white'),ch=bq(c,'highpass',2000),cg=c.createGain();cg.gain.setValueAtTime(0,c.currentTime);cg.gain.linearRampToValueAtTime(.055,c.currentTime+.01);cg.gain.exponentialRampToValueAtTime(.001,c.currentTime+.18);cr.connect(ch);ch.connect(cg);cg.connect(o);cr.start();cr.stop(c.currentTime+.22);}
+    setTimeout(rumble,9000+R()*11000);};rumble();return()=>{on=false;tryStop(bed);};
+};
+GENERATORS['forest']=(c,o)=>{
+  // Leaf rustle bed
+  const bed=ns(c,'pink'),hp=bq(c,'highpass',400),lp=bq(c,'lowpass',3000),bg=c.createGain();bg.gain.value=0.06;bed.connect(hp);hp.connect(lp);lp.connect(bg);bg.connect(o);bed.start();
+  let on=true;
+  // 3 distinct bird species at very different frequencies & patterns
+  // Species 1: low warbler (800-1200Hz), 3-note descending phrase, slow
+  const sp1=()=>{if(!on)return;const base=800+R()*200;[0,180,340].forEach((dl,i)=>setTimeout(()=>{if(!on)return;const ob=c.createOscillator(),g=c.createGain();ob.type='sine';ob.frequency.setValueAtTime(base*(1-.08*i),c.currentTime);ob.frequency.linearRampToValueAtTime(base*(.9-.08*i),c.currentTime+.14);g.gain.setValueAtTime(0,c.currentTime);g.gain.linearRampToValueAtTime(.045,c.currentTime+.02);g.gain.linearRampToValueAtTime(0,c.currentTime+.16);ob.connect(g);g.connect(o);ob.start();ob.stop(c.currentTime+.18);},dl));setTimeout(sp1,3500+R()*4000);};setTimeout(sp1,R()*1500);
+  // Species 2: high chirper (3000-4000Hz), rapid 5-note trill, medium pace
+  const sp2=()=>{if(!on)return;const f=3000+R()*1000,n=4+Math.floor(R()*3);for(let i=0;i<n;i++)setTimeout(()=>{if(!on)return;const ob=c.createOscillator(),g=c.createGain();ob.type='sine';ob.frequency.setValueAtTime(f,c.currentTime);ob.frequency.linearRampToValueAtTime(f*(1.12+R()*.1),c.currentTime+.04);g.gain.setValueAtTime(0,c.currentTime);g.gain.linearRampToValueAtTime(.038,c.currentTime+.01);g.gain.linearRampToValueAtTime(0,c.currentTime+.06);ob.connect(g);g.connect(o);ob.start();ob.stop(c.currentTime+.07);},i*75);setTimeout(sp2,2000+R()*3500);};setTimeout(sp2,800+R()*2000);
+  // Species 3: mid thrush (1600-2200Hz), long musical slide, infrequent
+  const sp3=()=>{if(!on)return;const f=1600+R()*600,ob=c.createOscillator(),g=c.createGain();ob.type='sine';ob.frequency.setValueAtTime(f,c.currentTime);ob.frequency.linearRampToValueAtTime(f*1.4,c.currentTime+.18);ob.frequency.linearRampToValueAtTime(f*1.2,c.currentTime+.32);ob.frequency.linearRampToValueAtTime(f*1.5,c.currentTime+.48);g.gain.setValueAtTime(0,c.currentTime);g.gain.linearRampToValueAtTime(.05,c.currentTime+.04);g.gain.setValueAtTime(.05,c.currentTime+.44);g.gain.linearRampToValueAtTime(0,c.currentTime+.54);ob.connect(g);g.connect(o);ob.start();ob.stop(c.currentTime+.58);setTimeout(sp3,4500+R()*6000);};setTimeout(sp3,2500+R()*3000);
+  return()=>{on=false;tryStop(bed);};
+};
+GENERATORS['wind']=(c,o)=>{
+  // Main wind body — slow gust LFO
+  const bed=ns(c,'pink'),hp=bq(c,'highpass',80),lp=bq(c,'lowpass',700),wg=c.createGain();wg.gain.value=0.3;bed.connect(hp);hp.connect(lp);lp.connect(wg);wg.connect(o);bed.start();
+  const lfo=c.createOscillator(),lg=c.createGain();lfo.type='sine';lfo.frequency.value=0.08;lg.gain.value=0.25;lfo.connect(lg);lg.connect(wg.gain);lfo.start();
+  // High whistle layer — faster gust LFO gives howl character
+  const hi=ns(c,'white'),hihp=bq(c,'highpass',1200),hilp=bq(c,'lowpass',3500),hg=c.createGain();hg.gain.value=0.06;hi.connect(hihp);hihp.connect(hilp);hilp.connect(hg);hg.connect(o);hi.start();
+  const lfo2=c.createOscillator(),lg2=c.createGain();lfo2.type='sine';lfo2.frequency.value=0.22;lg2.gain.value=0.055;lfo2.connect(lg2);lg2.connect(hg.gain);lfo2.start();
+  // Occasional howl tone (wind through crack)
+  let on=true;const howl=()=>{if(!on)return;const ob=c.createOscillator(),og=c.createGain();ob.type='sine';ob.frequency.setValueAtTime(280+R()*120,c.currentTime);ob.frequency.linearRampToValueAtTime(180+R()*80,c.currentTime+2.5);og.gain.setValueAtTime(0,c.currentTime);og.gain.linearRampToValueAtTime(.04,c.currentTime+.6);og.gain.linearRampToValueAtTime(0,c.currentTime+2.8);ob.connect(og);og.connect(o);ob.start();ob.stop(c.currentTime+3);setTimeout(howl,5000+R()*8000);};howl();
+  return()=>{on=false;tryStop(bed);tryStop(hi);tryStop(lfo);tryStop(lfo2);};
+};
+GENERATORS['ocean']=(c,o)=>{
+  // Deep bass swell (brown noise, very low)
+  const bass=ns(c,'brown'),bl=bq(c,'lowpass',80),bbg=c.createGain();bbg.gain.value=0.28;bass.connect(bl);bl.connect(bbg);bbg.connect(o);bass.start();
+  // Mid surf body
+  const surf=ns(c,'pink'),sl=bq(c,'lowpass',550),sg=c.createGain();sg.gain.value=0.1;surf.connect(sl);sl.connect(sg);sg.connect(o);surf.start();
+  // Foam sparkle (high white noise)
+  const foam=ns(c,'white'),fh=bq(c,'highpass',2500),fl=bq(c,'lowpass',7000),fg=c.createGain();fg.gain.value=0.025;foam.connect(fh);fh.connect(fl);fl.connect(fg);fg.connect(o);foam.start();
+  // Wave rhythm: swell all three layers together
+  let on=true,ph=0;const wave=()=>{if(!on)return;const dur=4.5+R()*2,t=c.currentTime;
+    [bbg,sg,fg].forEach((g,i)=>{g.gain.cancelScheduledValues(t);});
+    if(ph%2===0){
+      bbg.gain.linearRampToValueAtTime(.62,t+dur*.38);bbg.gain.linearRampToValueAtTime(.15,t+dur);
+      sg.gain.linearRampToValueAtTime(.48,t+dur*.42);sg.gain.linearRampToValueAtTime(.07,t+dur);
+      fg.gain.linearRampToValueAtTime(.1,t+dur*.5);fg.gain.linearRampToValueAtTime(.012,t+dur);
+    }else{
+      bbg.gain.linearRampToValueAtTime(.12,t+dur);sg.gain.linearRampToValueAtTime(.06,t+dur);fg.gain.linearRampToValueAtTime(.01,t+dur);
+    }ph++;setTimeout(wave,dur*1000);};wave();
+  return()=>{on=false;tryStop(bass);tryStop(surf);tryStop(foam);};
+};
 GENERATORS['river']=(c,o)=>{
   const bed=ns(c,'white'),h=bq(c,'highpass',500),l=bq(c,'lowpass',3000),bg=c.createGain();bg.gain.value=0.14;bed.connect(h);h.connect(l);l.connect(bg);bg.connect(o);bed.start();
   let on=true;const gurgle=()=>{if(!on)return;const s2=ns(c,'white'),bf=bq(c,'bandpass',900+R()*700,2.5+R()*1.5),g=c.createGain();g.gain.setValueAtTime(.1,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.07+R()*.08);s2.connect(bf);bf.connect(g);g.connect(o);s2.start();s2.stop(c.currentTime+.18);setTimeout(gurgle,55+R()*170);};gurgle();return()=>{on=false;tryStop(bed);};};
-GENERATORS['birds']=(c,o)=>{let on=true;const ch=()=>{if(!on)return;const n=3+Math.floor(R()*4);for(let i=0;i<n;i++)setTimeout(()=>{if(!on)return;const f=2000+R()*2200,ob=c.createOscillator(),bg=c.createGain();ob.type='sine';ob.frequency.setValueAtTime(f,c.currentTime);ob.frequency.linearRampToValueAtTime(f*(1.1+R()*.3),c.currentTime+.07);ob.frequency.linearRampToValueAtTime(f,c.currentTime+.15);bg.gain.setValueAtTime(0,c.currentTime);bg.gain.linearRampToValueAtTime(.055,c.currentTime+.02);bg.gain.linearRampToValueAtTime(0,c.currentTime+.17);ob.connect(bg);bg.connect(o);ob.start();ob.stop(c.currentTime+.19);},i*(110+R()*70));setTimeout(ch,500+R()*2000);};ch();return()=>{on=false;};};
+GENERATORS['birds']=(c,o)=>{
+  let on=true;
+  // Species A: Robin-like (2200-2800Hz), pairs of quick notes, medium pace
+  const spA=()=>{if(!on)return;const f=2200+R()*600;[0,100].forEach(dl=>setTimeout(()=>{if(!on)return;const ob=c.createOscillator(),g=c.createGain();ob.type='sine';ob.frequency.setValueAtTime(f,c.currentTime);ob.frequency.linearRampToValueAtTime(f*(1.08+R()*.06),c.currentTime+.08);g.gain.setValueAtTime(0,c.currentTime);g.gain.linearRampToValueAtTime(.055,c.currentTime+.015);g.gain.linearRampToValueAtTime(0,c.currentTime+.1);ob.connect(g);g.connect(o);ob.start();ob.stop(c.currentTime+.11);},dl));setTimeout(spA,1200+R()*2200);};setTimeout(spA,R()*1000);
+  // Species B: Sparrow (4000-5000Hz), rapid 6-8 note burst then silence
+  const spB=()=>{if(!on)return;const f=4000+R()*1000,n=5+Math.floor(R()*4);for(let i=0;i<n;i++)setTimeout(()=>{if(!on)return;const ob=c.createOscillator(),g=c.createGain();ob.type='sine';ob.frequency.value=f*(1+R()*.08-R()*.04);g.gain.setValueAtTime(.04,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.055);ob.connect(g);g.connect(o);ob.start();ob.stop(c.currentTime+.065);},i*62);setTimeout(spB,2500+R()*4000);};setTimeout(spB,1500+R()*2500);
+  // Species C: Dove/wood pigeon (600-900Hz), slow mournful coo with vibrato
+  const spC=()=>{if(!on)return;const f=650+R()*200;const ob=c.createOscillator(),g=c.createGain();ob.type='sine';ob.frequency.setValueAtTime(f,c.currentTime);ob.frequency.linearRampToValueAtTime(f*.88,c.currentTime+.35);ob.frequency.linearRampToValueAtTime(f*.92,c.currentTime+.65);g.gain.setValueAtTime(0,c.currentTime);g.gain.linearRampToValueAtTime(.04,c.currentTime+.06);g.gain.setValueAtTime(.04,c.currentTime+.6);g.gain.linearRampToValueAtTime(0,c.currentTime+.75);ob.connect(g);g.connect(o);ob.start();ob.stop(c.currentTime+.8);setTimeout(spC,4000+R()*6000);};setTimeout(spC,3000+R()*4000);
+  return()=>{on=false;};
+};
 GENERATORS['alpha']=(c,o)=>{const bed=ns(c,'pink'),l=bq(c,'lowpass',380),bg=c.createGain();bg.gain.value=0.05;bed.connect(l);l.connect(bg);bg.connect(o);bed.start();const left=c.createOscillator(),lg=c.createGain();left.type='sine';left.frequency.value=200;lg.gain.value=.055;left.connect(lg);lg.connect(o);left.start();const right=c.createOscillator(),rg=c.createGain();right.type='sine';right.frequency.value=210;rg.gain.value=.055;right.connect(rg);rg.connect(o);right.start();return()=>{tryStop(bed);tryStop(left);tryStop(right);};};
 GENERATORS['theta']=(c,o)=>{const bed=ns(c,'pink'),l=bq(c,'lowpass',300),bg=c.createGain();bg.gain.value=0.045;bed.connect(l);l.connect(bg);bg.connect(o);bed.start();const left=c.createOscillator(),lg=c.createGain();left.type='sine';left.frequency.value=155;lg.gain.value=.06;left.connect(lg);lg.connect(o);left.start();const right=c.createOscillator(),rg=c.createGain();right.type='sine';right.frequency.value=161;rg.gain.value=.06;right.connect(rg);rg.connect(o);right.start();return()=>{tryStop(bed);tryStop(left);tryStop(right);};};
-GENERATORS['chimes']=(c,o)=>{const freqs=[523.25,587.33,659.25,783.99,880,1046.5];let on=true;const ch=()=>{if(!on)return;const f=freqs[Math.floor(R()*freqs.length)],ob=c.createOscillator(),bg=c.createGain();ob.type='sine';ob.frequency.value=f;bg.gain.setValueAtTime(.09,c.currentTime);bg.gain.exponentialRampToValueAtTime(.001,c.currentTime+2.8);ob.connect(bg);bg.connect(o);ob.start();ob.stop(c.currentTime+3);const ob2=c.createOscillator(),bg2=c.createGain();ob2.type='sine';ob2.frequency.value=f*2.75;bg2.gain.setValueAtTime(.02,c.currentTime);bg2.gain.exponentialRampToValueAtTime(.001,c.currentTime+1.2);ob2.connect(bg2);bg2.connect(o);ob2.start();ob2.stop(c.currentTime+1.4);setTimeout(ch,2000+R()*3500);};ch();return()=>{on=false;};};
-GENERATORS['traffic']=(c,o)=>{const s=ns(c,'pink'),l=bq(c,'lowpass',200);s.connect(l);l.connect(o);s.start();let on=true;const car=()=>{if(!on)return;const s2=ns(c,'pink'),b=bq(c,'bandpass',280,1.8),g=c.createGain();g.gain.setValueAtTime(0,c.currentTime);g.gain.linearRampToValueAtTime(.18,c.currentTime+.55);g.gain.linearRampToValueAtTime(0,c.currentTime+2.8);s2.connect(b);b.connect(g);g.connect(o);s2.start();s2.stop(c.currentTime+3);setTimeout(car,3000+R()*7000);};car();return()=>{on=false;tryStop(s);};};
+GENERATORS['chimes']=(c,o)=>{
+  // Pentatonic scale + octave — wider, more musical range
+  const freqs=[261.63,293.66,349.23,392,440,523.25,587.33,698.46,784,880,1046.5];
+  let on=true;const ring=()=>{if(!on)return;const f=freqs[Math.floor(R()*freqs.length)];
+    // Fundamental — long decay
+    const ob=c.createOscillator(),g=c.createGain();ob.type='sine';ob.frequency.value=f;g.gain.setValueAtTime(.1,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+4.5);ob.connect(g);g.connect(o);ob.start();ob.stop(c.currentTime+4.8);
+    // 2nd partial (slightly inharmonic like real metal)
+    const ob2=c.createOscillator(),g2=c.createGain();ob2.type='sine';ob2.frequency.value=f*2.756;g2.gain.setValueAtTime(.028,c.currentTime);g2.gain.exponentialRampToValueAtTime(.001,c.currentTime+1.4);ob2.connect(g2);g2.connect(o);ob2.start();ob2.stop(c.currentTime+1.6);
+    // 3rd partial (bright attack shimmer)
+    const ob3=c.createOscillator(),g3=c.createGain();ob3.type='sine';ob3.frequency.value=f*5.4;g3.gain.setValueAtTime(.012,c.currentTime);g3.gain.exponentialRampToValueAtTime(.001,c.currentTime+.35);ob3.connect(g3);g3.connect(o);ob3.start();ob3.stop(c.currentTime+.4);
+    // Impact click (noise burst on strike)
+    const sn=ns(c,'white'),sh=bq(c,'highpass',3000),sg=c.createGain();sg.gain.setValueAtTime(.04,c.currentTime);sg.gain.exponentialRampToValueAtTime(.001,c.currentTime+.025);sn.connect(sh);sh.connect(sg);sg.connect(o);sn.start();sn.stop(c.currentTime+.035);
+    setTimeout(ring,2200+R()*4000);};ring();return()=>{on=false;};
+};
+GENERATORS['traffic']=(c,o)=>{
+  // Constant city bed
+  const bed=ns(c,'pink'),l=bq(c,'lowpass',180),bg=c.createGain();bg.gain.value=0.12;bed.connect(l);l.connect(bg);bg.connect(o);bed.start();
+  let on=true;const carPass=()=>{if(!on)return;const dur=2+R()*2.2,spd=R();
+    // Doppler noise whoosh
+    const s2=ns(c,'pink'),b=bq(c,'bandpass',300+spd*150,1.5),g=c.createGain();g.gain.setValueAtTime(0,c.currentTime);g.gain.linearRampToValueAtTime(.22+spd*.1,c.currentTime+dur*.28);g.gain.linearRampToValueAtTime(0,c.currentTime+dur);s2.connect(b);b.connect(g);g.connect(o);s2.start();s2.stop(c.currentTime+dur+.1);
+    // Engine tone (Doppler pitch shift)
+    const en=c.createOscillator(),eg=c.createGain();en.type='sawtooth';en.frequency.setValueAtTime(100+spd*60,c.currentTime);en.frequency.linearRampToValueAtTime(65+spd*25,c.currentTime+dur);eg.gain.setValueAtTime(0,c.currentTime);eg.gain.linearRampToValueAtTime(.038,c.currentTime+dur*.3);eg.gain.linearRampToValueAtTime(0,c.currentTime+dur);en.connect(eg);eg.connect(o);en.start();en.stop(c.currentTime+dur+.1);
+    setTimeout(carPass,1800+R()*4500);};carPass();return()=>{on=false;tryStop(bed);};
+};
 GENERATORS['night-city']=(c,o)=>{const bed=ns(c,'pink'),l=bq(c,'lowpass',150),bg=c.createGain();bg.gain.value=0.06;bed.connect(l);l.connect(bg);bg.connect(o);bed.start();let on=true;const car=()=>{if(!on)return;const s2=ns(c,'pink'),b=bq(c,'bandpass',200,1),g=c.createGain();g.gain.setValueAtTime(0,c.currentTime);g.gain.linearRampToValueAtTime(.09,c.currentTime+1.4);g.gain.linearRampToValueAtTime(0,c.currentTime+4);s2.connect(b);b.connect(g);g.connect(o);s2.start();s2.stop(c.currentTime+4.2);setTimeout(car,7000+R()*11000);};car();const siren=()=>{if(!on)return;let si=true;const sz=()=>{if(!on||!si)return;const ob=c.createOscillator(),sg=c.createGain();ob.type='sine';ob.frequency.setValueAtTime(680,c.currentTime);ob.frequency.linearRampToValueAtTime(900,c.currentTime+.4);ob.frequency.linearRampToValueAtTime(680,c.currentTime+.8);sg.gain.setValueAtTime(.018,c.currentTime);sg.gain.linearRampToValueAtTime(0,c.currentTime+.88);ob.connect(sg);sg.connect(o);ob.start();ob.stop(c.currentTime+.92);setTimeout(sz,920);};sz();setTimeout(()=>{si=false;},4000+R()*3000);setTimeout(siren,20000+R()*30000);};setTimeout(siren,6000+R()*10000);return()=>{on=false;tryStop(bed);};};
 GENERATORS['street']=(c,o)=>{
   const bed=ns(c,'white'),hp=bq(c,'highpass',300),lp=bq(c,'lowpass',2000),bg=c.createGain();bg.gain.value=0.12;bed.connect(hp);hp.connect(lp);lp.connect(bg);bg.connect(o);bed.start();
   const vb=ns(c,'pink'),vf=bq(c,'bandpass',500,1.2),vg=c.createGain();vg.gain.value=0.07;vb.connect(vf);vf.connect(vg);vg.connect(o);vb.start();
   let on=true;const step=()=>{if(!on)return;const s2=ns(c,'white'),h=bq(c,'highpass',2200),g=c.createGain();g.gain.setValueAtTime(.06,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.04);s2.connect(h);h.connect(g);g.connect(o);s2.start();s2.stop(c.currentTime+.06);setTimeout(step,380+R()*550);};step();return()=>{on=false;tryStop(bed);tryStop(vb);};};
 GENERATORS['subway']=(c,o)=>{const bed=ns(c,'pink'),l=bq(c,'lowpass',300),bg=c.createGain();bg.gain.value=0.26;bed.connect(l);l.connect(bg);bg.connect(o);bed.start();[82,164,246].forEach((f,i)=>{const d=c.createOscillator(),dg=c.createGain();d.type='sawtooth';d.frequency.value=f;dg.gain.value=[.048,.024,.01][i];d.connect(dg);dg.connect(o);d.start();});let on=true;const clack=()=>{if(!on)return;[0,110,220,330].forEach(dl=>setTimeout(()=>{if(!on)return;const s2=ns(c,'white'),h=bq(c,'bandpass',550+R()*100,4),g=c.createGain();g.gain.setValueAtTime(.085,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.065);s2.connect(h);h.connect(g);g.connect(o);s2.start();s2.stop(c.currentTime+.08);},dl));setTimeout(clack,440+R()*45);};clack();return()=>{on=false;tryStop(bed);};};
-GENERATORS['coffee']=(c,o)=>{const s=ns(c,'pink'),b=bq(c,'bandpass',700,1.4);s.connect(b);b.connect(o);s.start();let on=true;const v=()=>{if(!on)return;const dur=.3+R()*.9,s2=ns(c,'pink'),vf=bq(c,'bandpass',500+R()*600,2),vg=c.createGain();vg.gain.setValueAtTime(0,c.currentTime);vg.gain.linearRampToValueAtTime(.14,c.currentTime+.05);vg.gain.setValueAtTime(.14,c.currentTime+dur-.06);vg.gain.linearRampToValueAtTime(0,c.currentTime+dur);s2.connect(vf);vf.connect(vg);vg.connect(o);s2.start();s2.stop(c.currentTime+dur+.02);setTimeout(v,180+R()*1400);};v();return()=>{on=false;tryStop(s);};};
-GENERATORS['library']=(c,o)=>{const s=ns(c,'white'),l=bq(c,'lowpass',380);s.connect(l);l.connect(o);s.start();let on=true;const p=()=>{if(!on)return;const s2=ns(c,'white'),h=bq(c,'highpass',800),g=c.createGain();g.gain.setValueAtTime(0,c.currentTime);g.gain.linearRampToValueAtTime(.09,c.currentTime+.06);g.gain.linearRampToValueAtTime(0,c.currentTime+.3);s2.connect(h);h.connect(g);g.connect(o);s2.start();s2.stop(c.currentTime+.35);setTimeout(p,5000+R()*12000);};p();return()=>{on=false;tryStop(s);};};
-GENERATORS['typing']=(c,o)=>{let on=true;const b=()=>{if(!on)return;const n=5+Math.floor(R()*9);for(let i=0;i<n;i++)setTimeout(()=>{if(!on)return;const s2=ns(c,'white'),h=bq(c,'highpass',1800),g=c.createGain();g.gain.setValueAtTime(.065,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.045);s2.connect(h);h.connect(g);g.connect(o);s2.start();s2.stop(c.currentTime+.055);},i*(75+R()*55));setTimeout(b,500+R()*3200);};b();return()=>{on=false;};};
+GENERATORS['coffee']=(c,o)=>{
+  // Ambient room chatter — 3 formant bands
+  [480,750,1150].forEach((f,i)=>{const vb=ns(c,'pink'),vf=bq(c,'bandpass',f,1.4),vg=c.createGain();vg.gain.value=[.09,.065,.038][i];vb.connect(vf);vf.connect(vg);vg.connect(o);vb.start();});
+  let on=true;
+  // Voice fragment bursts
+  const voice=()=>{if(!on)return;const dur=.25+R()*.7,s2=ns(c,'pink'),vf=bq(c,'bandpass',550+R()*500,1.8),vg=c.createGain();vg.gain.setValueAtTime(0,c.currentTime);vg.gain.linearRampToValueAtTime(.11,c.currentTime+.04);vg.gain.setValueAtTime(.11,c.currentTime+dur-.05);vg.gain.linearRampToValueAtTime(0,c.currentTime+dur);s2.connect(vf);vf.connect(vg);vg.connect(o);s2.start();s2.stop(c.currentTime+dur+.03);setTimeout(voice,150+R()*1100);};voice();
+  // Espresso machine hiss (rare, distinct burst)
+  const hiss=()=>{if(!on)return;const dur=1.2+R()*1.8,sh=ns(c,'white'),hp=bq(c,'highpass',3500),hg=c.createGain();hg.gain.setValueAtTime(0,c.currentTime);hg.gain.linearRampToValueAtTime(.14,c.currentTime+.1);hg.gain.setValueAtTime(.14,c.currentTime+dur-.12);hg.gain.linearRampToValueAtTime(0,c.currentTime+dur);sh.connect(hp);hp.connect(hg);hg.connect(o);sh.start();sh.stop(c.currentTime+dur+.05);setTimeout(hiss,8000+R()*14000);};setTimeout(hiss,3000+R()*5000);
+  // Cup/spoon clink
+  const clink=()=>{if(!on)return;const f=1600+R()*1000,ob=c.createOscillator(),cg=c.createGain();ob.type='sine';ob.frequency.value=f;cg.gain.setValueAtTime(.06,c.currentTime);cg.gain.exponentialRampToValueAtTime(.001,c.currentTime+.5);ob.connect(cg);cg.connect(o);ob.start();ob.stop(c.currentTime+.55);const ob2=c.createOscillator(),cg2=c.createGain();ob2.type='sine';ob2.frequency.value=f*1.62;cg2.gain.setValueAtTime(.02,c.currentTime);cg2.gain.exponentialRampToValueAtTime(.001,c.currentTime+.22);ob2.connect(cg2);cg2.connect(o);ob2.start();ob2.stop(c.currentTime+.26);setTimeout(clink,7000+R()*12000);};setTimeout(clink,4000+R()*6000);
+  return()=>{on=false;};
+};
+GENERATORS['library']=(c,o)=>{
+  // Barely-there AC hum (60Hz + harmonics)
+  [60,120].forEach((f,i)=>{const ob=c.createOscillator(),g=c.createGain();ob.type='sine';ob.frequency.value=f;g.gain.value=[.012,.005][i];ob.connect(g);g.connect(o);ob.start();});
+  // Very faint room air noise
+  const bed=ns(c,'white'),lp=bq(c,'lowpass',280),bg=c.createGain();bg.gain.value=0.015;bed.connect(lp);lp.connect(bg);bg.connect(o);bed.start();
+  let on=true;
+  // Page turn — long crisp rustle
+  const page=()=>{if(!on)return;const s2=ns(c,'white'),hp=bq(c,'highpass',1800),lp2=bq(c,'lowpass',7000),g=c.createGain(),dur=.18+R()*.28;g.gain.setValueAtTime(0,c.currentTime);g.gain.linearRampToValueAtTime(.075,c.currentTime+.03);g.gain.setValueAtTime(.075,c.currentTime+dur-.04);g.gain.linearRampToValueAtTime(0,c.currentTime+dur);s2.connect(hp);hp.connect(lp2);lp2.connect(g);g.connect(o);s2.start();s2.stop(c.currentTime+dur+.02);setTimeout(page,5000+R()*13000);};page();
+  // Distant footstep (very quiet)
+  const foot=()=>{if(!on)return;const s2=ns(c,'white'),hp2=bq(c,'highpass',350),lp2=bq(c,'lowpass',1800),g=c.createGain();g.gain.setValueAtTime(.035,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.1);s2.connect(hp2);hp2.connect(lp2);lp2.connect(g);g.connect(o);s2.start();s2.stop(c.currentTime+.12);setTimeout(()=>{if(!on)return;const s3=ns(c,'white'),h3=bq(c,'highpass',350),l3=bq(c,'lowpass',1800),g3=c.createGain();g3.gain.setValueAtTime(.028,c.currentTime);g3.gain.exponentialRampToValueAtTime(.001,c.currentTime+.09);s3.connect(h3);h3.connect(l3);l3.connect(g3);g3.connect(o);s3.start();s3.stop(c.currentTime+.11);},500+R()*200);setTimeout(foot,8000+R()*16000);};setTimeout(foot,4000+R()*6000);
+  return()=>{on=false;tryStop(bed);};
+};
+GENERATORS['typing']=(c,o)=>{let on=true;const burst=()=>{if(!on)return;const n=6+Math.floor(R()*10);for(let i=0;i<n;i++)setTimeout(()=>{if(!on)return;
+    // Key click (high noise)
+    const s2=ns(c,'white'),hp=bq(c,'highpass',2000),g=c.createGain();g.gain.setValueAtTime(.07+R()*.03,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.038);s2.connect(hp);hp.connect(g);g.connect(o);s2.start();s2.stop(c.currentTime+.052);
+    // Key body thud (low sine)
+    const ob=c.createOscillator(),og=c.createGain();ob.type='sine';ob.frequency.value=105+R()*65;og.gain.setValueAtTime(.025,c.currentTime);og.gain.exponentialRampToValueAtTime(.001,c.currentTime+.055);ob.connect(og);og.connect(o);ob.start();ob.stop(c.currentTime+.065);
+  },i*(58+R()*52));
+  // Occasional spacebar (lower pitch, wider)
+  if(R()<.3)setTimeout(()=>{if(!on)return;const sb=ns(c,'white'),shp=bq(c,'highpass',800),slp=bq(c,'lowpass',3000),sg=c.createGain();sg.gain.setValueAtTime(.08,c.currentTime);sg.gain.exponentialRampToValueAtTime(.001,c.currentTime+.06);sb.connect(shp);shp.connect(slp);slp.connect(sg);sg.connect(o);sb.start();sb.stop(c.currentTime+.075);},n*60+R()*200);
+  setTimeout(burst,600+R()*2800);};burst();return()=>{on=false;};
+};
 GENERATORS['office-chat']=(c,o)=>{
   [420,680,1050,1450].forEach((f,i)=>{const vb=ns(c,'pink'),vf=bq(c,'bandpass',f,1.3),vg=c.createGain();vg.gain.value=[.09,.07,.045,.025][i];vb.connect(vf);vf.connect(vg);vg.connect(o);vb.start();});
   let on=true;const murmur=()=>{if(!on)return;const s2=ns(c,'pink'),bf=bq(c,'bandpass',600+R()*500,1.6),g=c.createGain(),dur=.18+R()*.5;g.gain.setValueAtTime(0,c.currentTime);g.gain.linearRampToValueAtTime(.08,c.currentTime+.04);g.gain.setValueAtTime(.08,c.currentTime+dur-.04);g.gain.linearRampToValueAtTime(0,c.currentTime+dur);s2.connect(bf);bf.connect(g);g.connect(o);s2.start();s2.stop(c.currentTime+dur+.02);setTimeout(murmur,100+R()*600);};murmur();return()=>{on=false;};};
 GENERATORS['printer']=(c,o)=>{let on=true;const sc=()=>{if(!on)return;const dur=1.8+R()*2.2,s2=ns(c,'white'),b=bq(c,'bandpass',850,2.5),g=c.createGain();g.gain.setValueAtTime(0,c.currentTime);g.gain.linearRampToValueAtTime(.07,c.currentTime+.1);g.gain.setValueAtTime(.07,c.currentTime+dur-.1);g.gain.linearRampToValueAtTime(0,c.currentTime+dur);s2.connect(b);b.connect(g);g.connect(o);s2.start();s2.stop(c.currentTime+dur+.05);for(let i=0;i<Math.floor(dur*8);i++)setTimeout(()=>{if(!on)return;const sc2=ns(c,'white'),hc=bq(c,'highpass',3000),gc=c.createGain();gc.gain.setValueAtTime(.045,c.currentTime);gc.gain.exponentialRampToValueAtTime(.001,c.currentTime+.022);sc2.connect(hc);hc.connect(gc);gc.connect(o);sc2.start();sc2.stop(c.currentTime+.03);},i*125);setTimeout(sc,4500+R()*9000);};sc();return()=>{on=false;};};
 GENERATORS['movement']=(c,o)=>{let on=true;const footstep=()=>{if(!on)return;const s2=ns(c,'white'),hp=bq(c,'highpass',400),lp=bq(c,'lowpass',2000),g=c.createGain();g.gain.setValueAtTime(.07,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.08);s2.connect(hp);hp.connect(lp);lp.connect(g);g.connect(o);s2.start();s2.stop(c.currentTime+.1);const ob=c.createOscillator(),og=c.createGain();ob.type='sine';ob.frequency.value=55+R()*40;og.gain.setValueAtTime(.04,c.currentTime);og.gain.exponentialRampToValueAtTime(.001,c.currentTime+.18);ob.connect(og);og.connect(o);ob.start();ob.stop(c.currentTime+.2);setTimeout(()=>{if(!on)return;const s3=ns(c,'white'),hp3=bq(c,'highpass',400),lp3=bq(c,'lowpass',2000),g3=c.createGain();g3.gain.setValueAtTime(.055,c.currentTime);g3.gain.exponentialRampToValueAtTime(.001,c.currentTime+.07);s3.connect(hp3);hp3.connect(lp3);lp3.connect(g3);g3.connect(o);s3.start();s3.stop(c.currentTime+.09);},480+R()*160);setTimeout(footstep,2800+R()*5500);};footstep();return()=>{on=false;};};
-GENERATORS['airplane']=(c,o)=>{const s=ns(c,'pink'),l=bq(c,'lowpass',420);s.connect(l);l.connect(o);s.start();[110,115.5,220].forEach((f,i)=>{const d=c.createOscillator(),dg=c.createGain();d.type='sawtooth';d.frequency.value=f;dg.gain.value=[.055,.04,.018][i];d.connect(dg);dg.connect(o);d.start();});return()=>tryStop(s);};
-GENERATORS['train']=(c,o)=>{const s=ns(c,'pink'),l=bq(c,'lowpass',300);s.connect(l);l.connect(o);s.start();let on=true;const cl=()=>{if(!on)return;[0,165].forEach(dl=>setTimeout(()=>{if(!on)return;const ss=ns(c,'white'),h=bq(c,'bandpass',520,3.5),g=c.createGain();g.gain.setValueAtTime(dl===0?.11:.075,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.09);ss.connect(h);h.connect(g);g.connect(o);ss.start();ss.stop(c.currentTime+.11);},dl));setTimeout(cl,1080+R()*80);};cl();return()=>{on=false;tryStop(s);};};
+GENERATORS['airplane']=(c,o)=>{
+  // Engine harmonic stack (4 sawtooth partials)
+  [105,210,315,420].forEach((f,i)=>{const d=c.createOscillator(),dg=c.createGain();d.type='sawtooth';d.frequency.value=f;dg.gain.value=[.065,.04,.022,.01][i];d.connect(dg);dg.connect(o);d.start();});
+  // Air rush noise (cabin pressure hiss)
+  const air=ns(c,'pink'),al=bq(c,'lowpass',480),ag=c.createGain();ag.gain.value=0.18;air.connect(al);al.connect(ag);ag.connect(o);air.start();
+  // High-freq air leak (thin hiss)
+  const hi=ns(c,'white'),hh=bq(c,'highpass',4000),hg=c.createGain();hg.gain.value=0.04;hi.connect(hh);hh.connect(hg);hg.connect(o);hi.start();
+  // Gentle LFO for slight engine variation
+  const lfo=c.createOscillator(),lg=c.createGain();lfo.type='sine';lfo.frequency.value=0.06;lg.gain.value=0.02;lfo.connect(lg);lg.connect(ag.gain);lfo.start();
+  return()=>{tryStop(air);tryStop(hi);tryStop(lfo);};
+};
+GENERATORS['train']=(c,o)=>{
+  // Engine rumble
+  const bed=ns(c,'pink'),l=bq(c,'lowpass',280),bg=c.createGain();bg.gain.value=0.22;bed.connect(l);l.connect(bg);bg.connect(o);bed.start();
+  const eng=c.createOscillator(),eg=c.createGain();eng.type='sawtooth';eng.frequency.value=62;eg.gain.value=.055;eng.connect(eg);eg.connect(o);eng.start();
+  // Rhythmic 2-beat clack (strong + weak)
+  let on=true;const cl=()=>{if(!on)return;[0,190].forEach(dl=>setTimeout(()=>{if(!on)return;const ss=ns(c,'white'),h=bq(c,'bandpass',500+R()*80,3.5),g=c.createGain();g.gain.setValueAtTime(dl===0?.13:.085,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.09);ss.connect(h);h.connect(g);g.connect(o);ss.start();ss.stop(c.currentTime+.11);},dl));setTimeout(cl,960+R()*65);};cl();
+  // Distant horn (rare)
+  const horn=()=>{if(!on)return;[220,275,330].forEach((f,i)=>{const ob=c.createOscillator(),hg=c.createGain();ob.type='sawtooth';ob.frequency.value=f;hg.gain.setValueAtTime(0,c.currentTime+i*.05);hg.gain.linearRampToValueAtTime(.025,c.currentTime+i*.05+.15);hg.gain.setValueAtTime(.025,c.currentTime+.9);hg.gain.linearRampToValueAtTime(0,c.currentTime+1.2);ob.connect(hg);hg.connect(o);ob.start();ob.stop(c.currentTime+1.3);});setTimeout(horn,18000+R()*25000);};setTimeout(horn,8000+R()*12000);
+  return()=>{on=false;tryStop(bed);tryStop(eng);};
+};
 GENERATORS['bus']=(c,o)=>{const bed=ns(c,'pink'),l=bq(c,'lowpass',360),bg=c.createGain();bg.gain.value=0.2;bed.connect(l);l.connect(bg);bg.connect(o);bed.start();[88,176,92].forEach((f,i)=>{const d=c.createOscillator(),dg=c.createGain();d.type='sawtooth';d.frequency.value=f;dg.gain.value=[.052,.026,.02][i];d.connect(dg);dg.connect(o);d.start();});let on=true;const bump=()=>{if(!on)return;const s2=ns(c,'white'),bf=bq(c,'bandpass',180+R()*120,2),g=c.createGain();g.gain.setValueAtTime(.048,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.06);s2.connect(bf);bf.connect(g);g.connect(o);s2.start();s2.stop(c.currentTime+.08);setTimeout(bump,1200+R()*2000);};bump();return()=>{on=false;tryStop(bed);};};
 
-function fireCrackle(c,o,alive){const cr=()=>{if(!alive())return;const s2=ns(c,'white'),h=bq(c,'bandpass',800+R()*1400,2.8),g=c.createGain();g.gain.setValueAtTime(0,c.currentTime);g.gain.linearRampToValueAtTime(.065+R()*.055,c.currentTime+.012);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.065+R()*.09);s2.connect(h);h.connect(g);g.connect(o);s2.start();s2.stop(c.currentTime+.2);setTimeout(cr,140+R()*580);};cr();}
-GENERATORS['fireplace']=(c,o)=>{const s=ns(c,'pink'),l=bq(c,'lowpass',360);s.connect(l);l.connect(o);s.start();let on=true;fireCrackle(c,o,()=>on);return()=>{on=false;tryStop(s);};};
-GENERATORS['cabin']=(c,o)=>{const sw=ns(c,'pink'),hw=bq(c,'highpass',80),lw=bq(c,'lowpass',500);sw.connect(hw);hw.connect(lw);lw.connect(o);sw.start();const sf=ns(c,'pink'),lf=bq(c,'lowpass',300);sf.connect(lf);lf.connect(o);sf.start();let on=true;fireCrackle(c,o,()=>on);return()=>{on=false;tryStop(sw);tryStop(sf);};};
-GENERATORS['lofi']=(c,o)=>{const hs=ns(c,'white'),hg=c.createGain(),hp=bq(c,'highpass',5000);hg.gain.value=.016;hs.connect(hp);hp.connect(hg);hg.connect(o);hs.start();const chords=[[130.8,164.8,196,246.9],[110,130.8,164.8,196],[87.31,110,130.8,164.8],[98,123.5,146.8,185]];let ci=0,on=true;const ch=()=>{if(!on)return;chords[ci%4].forEach(f=>{const ob=c.createOscillator(),eg=c.createGain(),lp=bq(c,'lowpass',900);ob.type='triangle';ob.frequency.value=f;eg.gain.setValueAtTime(0,c.currentTime);eg.gain.linearRampToValueAtTime(.05,c.currentTime+.35);eg.gain.setValueAtTime(.05,c.currentTime+1.4);eg.gain.linearRampToValueAtTime(0,c.currentTime+2.8);ob.connect(lp);lp.connect(eg);eg.connect(o);ob.start();ob.stop(c.currentTime+2.9);});ci++;setTimeout(ch,3000);};ch();return()=>{on=false;tryStop(hs);};};
-GENERATORS['piano']=(c,o)=>{const notes=[261.63,293.66,329.63,392,440,523.25,587.33,659.25];let on=true;const n=()=>{if(!on)return;const f=notes[Math.floor(R()*notes.length)],ob=c.createOscillator(),eg=c.createGain();ob.type='sine';ob.frequency.value=f;eg.gain.setValueAtTime(0,c.currentTime);eg.gain.linearRampToValueAtTime(.065,c.currentTime+.02);eg.gain.exponentialRampToValueAtTime(.001,c.currentTime+2);ob.connect(eg);eg.connect(o);ob.start();ob.stop(c.currentTime+2.2);const ob2=c.createOscillator(),eg2=c.createGain();ob2.type='sine';ob2.frequency.value=f*2;eg2.gain.setValueAtTime(0,c.currentTime);eg2.gain.linearRampToValueAtTime(.016,c.currentTime+.01);eg2.gain.exponentialRampToValueAtTime(.001,c.currentTime+.9);ob2.connect(eg2);eg2.connect(o);ob2.start();ob2.stop(c.currentTime+1);setTimeout(n,650+R()*1300);};n();return()=>{on=false;};};
-GENERATORS['guitar']=(c,o)=>{const arp=[110,164.81,220,261.63,329.63,440];let on=true,idx=0;const p=()=>{if(!on)return;const f=arp[idx%arp.length],ob=c.createOscillator(),eg=c.createGain(),lp=bq(c,'lowpass',1800);ob.type='sawtooth';ob.frequency.value=f;eg.gain.setValueAtTime(.055,c.currentTime);eg.gain.exponentialRampToValueAtTime(.001,c.currentTime+1.4);ob.connect(lp);lp.connect(eg);eg.connect(o);ob.start();ob.stop(c.currentTime+1.5);idx++;setTimeout(p,360+R()*80);};p();return()=>{on=false;};};
+function fireCrackle(c,o,alive){
+  const cr=()=>{if(!alive())return;const s2=ns(c,'white'),h=bq(c,'bandpass',700+R()*1600,2.5),g=c.createGain();const v=.05+R()*.08;g.gain.setValueAtTime(0,c.currentTime);g.gain.linearRampToValueAtTime(v,c.currentTime+.009);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.05+R()*.1);s2.connect(h);h.connect(g);g.connect(o);s2.start();s2.stop(c.currentTime+.18);setTimeout(cr,100+R()*480);};cr();
+  const pop=()=>{if(!alive())return;const ob=c.createOscillator(),g=c.createGain();ob.type='sine';ob.frequency.setValueAtTime(180+R()*120,c.currentTime);ob.frequency.exponentialRampToValueAtTime(55,c.currentTime+.1);g.gain.setValueAtTime(.12,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.16);ob.connect(g);g.connect(o);ob.start();ob.stop(c.currentTime+.18);setTimeout(pop,1800+R()*4500);};pop();
+}
+GENERATORS['fireplace']=(c,o)=>{
+  // Deep roar (brown noise very low)
+  const roar=ns(c,'brown'),rl=bq(c,'lowpass',180),rg=c.createGain();rg.gain.value=0.26;roar.connect(rl);rl.connect(rg);rg.connect(o);roar.start();
+  // Mid crackling bed
+  const mid=ns(c,'pink'),ml=bq(c,'bandpass',260,1.1),mg=c.createGain();mg.gain.value=0.1;mid.connect(ml);ml.connect(mg);mg.connect(o);mid.start();
+  // LFO flicker (flame dance)
+  const lfo=c.createOscillator(),lg=c.createGain();lfo.type='sine';lfo.frequency.value=3.8;lg.gain.value=0.07;lfo.connect(lg);lg.connect(rg.gain);lfo.start();
+  let on=true;fireCrackle(c,o,()=>on);return()=>{on=false;tryStop(roar);tryStop(mid);tryStop(lfo);};
+};
+GENERATORS['cabin']=(c,o)=>{
+  // Wind outside (LFO howl)
+  const wind=ns(c,'pink'),whp=bq(c,'highpass',100),wlp=bq(c,'lowpass',600),wg=c.createGain();wg.gain.value=0.14;wind.connect(whp);whp.connect(wlp);wlp.connect(wg);wg.connect(o);wind.start();
+  const lfo=c.createOscillator(),lg=c.createGain();lfo.type='sine';lfo.frequency.value=0.1;lg.gain.value=0.12;lfo.connect(lg);lg.connect(wg.gain);lfo.start();
+  // Wind howl through gaps
+  const hi=ns(c,'white'),hihp=bq(c,'highpass',900),hilp=bq(c,'lowpass',2500),hig=c.createGain();hig.gain.value=0.04;hi.connect(hihp);hihp.connect(hilp);hilp.connect(hig);hig.connect(o);hi.start();
+  const lfo2=c.createOscillator(),lg2=c.createGain();lfo2.type='sine';lfo2.frequency.value=0.18;lg2.gain.value=0.035;lfo2.connect(lg2);lg2.connect(hig.gain);lfo2.start();
+  // Fire roar
+  const fire=ns(c,'brown'),fl=bq(c,'lowpass',200),fg=c.createGain();fg.gain.value=0.18;fire.connect(fl);fl.connect(fg);fg.connect(o);fire.start();
+  let on=true;fireCrackle(c,o,()=>on);
+  // Wood creak
+  const creak=()=>{if(!on)return;const ob=c.createOscillator(),cg=c.createGain();ob.type='sine';ob.frequency.setValueAtTime(160+R()*90,c.currentTime);ob.frequency.linearRampToValueAtTime(110+R()*50,c.currentTime+.38);cg.gain.setValueAtTime(.032,c.currentTime);cg.gain.exponentialRampToValueAtTime(.001,c.currentTime+.45);ob.connect(cg);cg.connect(o);ob.start();ob.stop(c.currentTime+.5);setTimeout(creak,8000+R()*14000);};creak();
+  return()=>{on=false;tryStop(wind);tryStop(hi);tryStop(fire);tryStop(lfo);tryStop(lfo2);};
+};
+GENERATORS['lofi']=(c,o)=>{
+  // Vinyl crackle
+  const hs=ns(c,'white'),hg=c.createGain(),hpf=bq(c,'highpass',6000);hg.gain.value=.014;hs.connect(hpf);hpf.connect(hg);hg.connect(o);hs.start();
+  // Cmaj7→Am7→Fmaj7→G7 chord loop (higher octave, warmer)
+  const chords=[[261.63,329.63,392,493.88],[220,261.63,329.63,440],[174.61,220,261.63,349.23],[196,246.94,293.66,392]];
+  let ci=0,on=true;const ch=()=>{if(!on)return;const t=c.currentTime;
+    chords[ci%4].forEach(f=>{const ob=c.createOscillator(),eg=c.createGain(),lp=bq(c,'lowpass',1100);ob.type='triangle';ob.frequency.value=f;eg.gain.setValueAtTime(0,t);eg.gain.linearRampToValueAtTime(.038,t+.18);eg.gain.setValueAtTime(.038,t+2.2);eg.gain.linearRampToValueAtTime(0,t+2.9);ob.connect(lp);lp.connect(eg);eg.connect(o);ob.start();ob.stop(t+3);});
+    // Walking bass
+    const bf=chords[ci%4][0]/2,bo=c.createOscillator(),bog=c.createGain();bo.type='triangle';bo.frequency.value=bf;bog.gain.setValueAtTime(.07,t);bog.gain.exponentialRampToValueAtTime(.001,t+1.8);bo.connect(bog);bog.connect(o);bo.start();bo.stop(t+2);
+    // Kick on beat 1
+    const ks=ns(c,'pink'),kl=bq(c,'lowpass',100),kg=c.createGain();kg.gain.setValueAtTime(.22,t);kg.gain.exponentialRampToValueAtTime(.001,t+.2);ks.connect(kl);kl.connect(kg);kg.connect(o);ks.start();ks.stop(t+.25);
+    // Snare on beat 2 (1.5s in)
+    setTimeout(()=>{if(!on)return;const ss=ns(c,'white'),sh=bq(c,'highpass',1000),sg=c.createGain();sg.gain.setValueAtTime(.09,c.currentTime);sg.gain.exponentialRampToValueAtTime(.001,c.currentTime+.08);ss.connect(sh);sh.connect(sg);sg.connect(o);ss.start();ss.stop(c.currentTime+.1);},1500);
+    ci++;setTimeout(ch,3000);};ch();return()=>{on=false;tryStop(hs);};
+};
+GENERATORS['piano']=(c,o)=>{
+  // Pentatonic scale — two octaves for variety
+  const notes=[261.63,293.66,349.23,392,440,523.25,587.33,698.46,784,880];let on=true;
+  const note=()=>{if(!on)return;const f=notes[Math.floor(R()*notes.length)];
+    // Fundamental (long decay)
+    const ob=c.createOscillator(),eg=c.createGain();ob.type='sine';ob.frequency.value=f;eg.gain.setValueAtTime(.08,c.currentTime);eg.gain.exponentialRampToValueAtTime(.001,c.currentTime+3);ob.connect(eg);eg.connect(o);ob.start();ob.stop(c.currentTime+3.2);
+    // 2nd harmonic
+    const ob2=c.createOscillator(),eg2=c.createGain();ob2.type='sine';ob2.frequency.value=f*2.001;eg2.gain.setValueAtTime(.022,c.currentTime);eg2.gain.exponentialRampToValueAtTime(.001,c.currentTime+1.2);ob2.connect(eg2);eg2.connect(o);ob2.start();ob2.stop(c.currentTime+1.4);
+    // 3rd harmonic
+    const ob3=c.createOscillator(),eg3=c.createGain();ob3.type='sine';ob3.frequency.value=f*3.002;eg3.gain.setValueAtTime(.008,c.currentTime);eg3.gain.exponentialRampToValueAtTime(.001,c.currentTime+.45);ob3.connect(eg3);eg3.connect(o);ob3.start();ob3.stop(c.currentTime+.55);
+    // Hammer attack click
+    const sn=ns(c,'white'),sh=bq(c,'bandpass',f*4,6),sg=c.createGain();sg.gain.setValueAtTime(.022,c.currentTime);sg.gain.exponentialRampToValueAtTime(.001,c.currentTime+.018);sn.connect(sh);sh.connect(sg);sg.connect(o);sn.start();sn.stop(c.currentTime+.025);
+    setTimeout(note,600+R()*1400);};note();return()=>{on=false;};
+};
+GENERATORS['guitar']=(c,o)=>{
+  // Am pentatonic pattern: A2→C3→D3→E3→G3→A3→G3→E3 (musical loop)
+  const pattern=[110,130.81,146.83,164.81,196,220,196,164.81];let on=true,idx=0;
+  const pluck=()=>{if(!on)return;const f=pattern[idx%pattern.length];
+    // Pluck body (sawtooth → lowpass for string warmth)
+    const ob=c.createOscillator(),eg=c.createGain(),lp=bq(c,'lowpass',2000);ob.type='sawtooth';ob.frequency.value=f;eg.gain.setValueAtTime(.065,c.currentTime);eg.gain.exponentialRampToValueAtTime(.001,c.currentTime+2.2);ob.connect(lp);lp.connect(eg);eg.connect(o);ob.start();ob.stop(c.currentTime+2.4);
+    // Harmonic shimmer
+    const ob2=c.createOscillator(),eg2=c.createGain();ob2.type='sine';ob2.frequency.value=f*2.002;eg2.gain.setValueAtTime(.018,c.currentTime);eg2.gain.exponentialRampToValueAtTime(.001,c.currentTime+.9);ob2.connect(eg2);eg2.connect(o);ob2.start();ob2.stop(c.currentTime+1);
+    // String attack (brief noise burst)
+    const sn=ns(c,'white'),sh=bq(c,'bandpass',f*3,5),sg=c.createGain();sg.gain.setValueAtTime(.03,c.currentTime);sg.gain.exponentialRampToValueAtTime(.001,c.currentTime+.022);sn.connect(sh);sh.connect(sg);sg.connect(o);sn.start();sn.stop(c.currentTime+.03);
+    idx++;setTimeout(pluck,340+R()*60);};pluck();return()=>{on=false;};
+};
 GENERATORS['white-noise']=(c,o)=>{const s=ns(c,'white');s.connect(o);s.start();return()=>tryStop(s);};
 GENERATORS['brown-noise']=(c,o)=>{const s=ns(c,'brown'),l=bq(c,'lowpass',280);s.connect(l);l.connect(o);s.start();return()=>tryStop(s);};
 GENERATORS['pink-noise'] =(c,o)=>{const s=ns(c,'pink'); s.connect(o);s.start();return()=>tryStop(s);};
