@@ -1156,37 +1156,49 @@ const GENERATORS={};
 function rainBase(c,o,nt,hp,lp){ const s=ns(c,nt),h=bq(c,'highpass',hp),l=bq(c,'lowpass',lp,.4); s.connect(h);h.connect(l);l.connect(o);s.start();return s; }
 
 GENERATORS['light-rain']=(c,o)=>{
-  // Gentle hiss bed
-  const bed=ns(c,'white'),hp=bq(c,'highpass',1400),lp=bq(c,'lowpass',5000),bg=c.createGain();bg.gain.value=0.032;bed.connect(hp);hp.connect(lp);lp.connect(bg);bg.connect(o);bed.start();
-  let on=true;const drip=()=>{if(!on)return;
-    // Noise burst (realistic drop impact)
-    const s2=ns(c,'white'),h=bq(c,'bandpass',1600+R()*1200,3.5),g=c.createGain();g.gain.setValueAtTime(.13,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.038);s2.connect(h);h.connect(g);g.connect(o);s2.start();s2.stop(c.currentTime+.055);
-    // Soft ring-down after impact
-    const ob=c.createOscillator(),og=c.createGain();ob.type='sine';ob.frequency.setValueAtTime(700+R()*400,c.currentTime);ob.frequency.exponentialRampToValueAtTime(300+R()*100,c.currentTime+.22);og.gain.setValueAtTime(.018,c.currentTime);og.gain.exponentialRampToValueAtTime(.001,c.currentTime+.28);ob.connect(og);og.connect(o);ob.start();ob.stop(c.currentTime+.3);
-    setTimeout(drip,750+R()*1600);};drip();return()=>{on=false;tryStop(bed);};
-};GENERATORS['rain-window']=(c,o)=>{
-  // Subtle condensation hiss on glass
-  const bed=ns(c,'white'),hp=bq(c,'highpass',1800),lp=bq(c,'lowpass',6000),bg=c.createGain();bg.gain.value=0.025;bed.connect(hp);hp.connect(lp);lp.connect(bg);bg.connect(o);bed.start();
-  let on=true;const tap=()=>{if(!on)return;const f=600+R()*500;
-    // Impact noise burst
-    const s2=ns(c,'white'),h=bq(c,'bandpass',f*2.2,4),g=c.createGain();g.gain.setValueAtTime(.09,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.025);s2.connect(h);h.connect(g);g.connect(o);s2.start();s2.stop(c.currentTime+.04);
-    // Glass fundamental ring
-    const ob=c.createOscillator(),og=c.createGain();ob.type='sine';ob.frequency.value=f;og.gain.setValueAtTime(.07,c.currentTime);og.gain.exponentialRampToValueAtTime(.001,c.currentTime+.55);ob.connect(og);og.connect(o);ob.start();ob.stop(c.currentTime+.6);
-    // Glass 2nd partial (inharmonic)
-    const ob2=c.createOscillator(),og2=c.createGain();ob2.type='sine';ob2.frequency.value=f*1.68;og2.gain.setValueAtTime(.025,c.currentTime);og2.gain.exponentialRampToValueAtTime(.001,c.currentTime+.22);ob2.connect(og2);og2.connect(o);ob2.start();ob2.stop(c.currentTime+.26);
-    // Glass 3rd partial
-    const ob3=c.createOscillator(),og3=c.createGain();ob3.type='sine';ob3.frequency.value=f*3.1;og3.gain.setValueAtTime(.009,c.currentTime);og3.gain.exponentialRampToValueAtTime(.001,c.currentTime+.08);ob3.connect(og3);og3.connect(o);ob3.start();ob3.stop(c.currentTime+.1);
-    setTimeout(tap,420+R()*1100);};tap();return()=>{on=false;tryStop(bed);};
-};GENERATORS['distant-thunder']=(c,o)=>{
-  const bed=ns(c,'pink'),l=bq(c,'lowpass',140,.5),bg=c.createGain();bg.gain.value=0.03;bed.connect(l);l.connect(bg);bg.connect(o);bed.start();
-  let on=true;const rumble=()=>{if(!on)return;
-    // Multi-frequency low rumble
-    [22+R()*12,34+R()*10].forEach((f,i)=>{const ro=c.createOscillator(),rg=c.createGain();ro.type='sine';ro.frequency.value=f;rg.gain.setValueAtTime(0,c.currentTime);rg.gain.linearRampToValueAtTime([.18,.09][i],c.currentTime+.7+i*.3);rg.gain.exponentialRampToValueAtTime(.001,c.currentTime+5+i*1.2);ro.connect(rg);rg.connect(o);ro.start();ro.stop(c.currentTime+6.5);});
-    // Low noise bloom
-    const wn=ns(c,'pink'),wl=bq(c,'lowpass',120),wg=c.createGain();wg.gain.setValueAtTime(0,c.currentTime);wg.gain.linearRampToValueAtTime(.12,c.currentTime+.5);wg.gain.exponentialRampToValueAtTime(.001,c.currentTime+4.5);wn.connect(wl);wl.connect(wg);wg.connect(o);wn.start();wn.stop(c.currentTime+5);
-    // Occasional far lightning crack (brief, rare)
-    if(R()<.4){const cr=ns(c,'white'),ch=bq(c,'highpass',2000),cg=c.createGain();cg.gain.setValueAtTime(0,c.currentTime);cg.gain.linearRampToValueAtTime(.055,c.currentTime+.01);cg.gain.exponentialRampToValueAtTime(.001,c.currentTime+.18);cr.connect(ch);ch.connect(cg);cg.connect(o);cr.start();cr.stop(c.currentTime+.22);}
-    setTimeout(rumble,9000+R()*11000);};rumble();return()=>{on=false;tryStop(bed);};
+  // Muffled distant rain texture (like rain on leaves far away)
+  const bed=ns(c,'pink'),bl=bq(c,'lowpass',500),bg=c.createGain();bg.gain.value=0.028;bed.connect(bl);bl.connect(bg);bg.connect(o);bed.start();
+  let on=true;
+  const drop=()=>{if(!on)return;
+    // Each drop hits a random surface: leaf (high), ground (mid), puddle (splashy)
+    const t=R(),fc=t<0.4?2200+R()*1800:t<0.72?700+R()*400:1400+R()*700,q=t<0.4?5:t<0.72?3:2.5;
+    // Impact — pure noise burst, no tonal sine (real drops aren't tonal)
+    const s=ns(c,'white'),h=bq(c,'bandpass',fc,q),g=c.createGain();g.gain.setValueAtTime(.11+R()*.05,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.018+R()*.012);s.connect(h);h.connect(g);g.connect(o);s.start();s.stop(c.currentTime+.038);
+    // Puddle splash tail (only for puddle drops)
+    if(t>=0.72){const sp=ns(c,'white'),sph=bq(c,'highpass',1800),spg=c.createGain();spg.gain.setValueAtTime(.035,c.currentTime+.01);spg.gain.exponentialRampToValueAtTime(.001,c.currentTime+.09);sp.connect(sph);sph.connect(spg);spg.connect(o);sp.start();sp.stop(c.currentTime+.1);}
+    // Very occasional 2-drop cluster
+    if(R()<0.18)setTimeout(()=>{if(!on)return;const s2=ns(c,'white'),h2=bq(c,'bandpass',fc*(0.75+R()*.5),q),g2=c.createGain();g2.gain.setValueAtTime(.07+R()*.03,c.currentTime);g2.gain.exponentialRampToValueAtTime(.001,c.currentTime+.016);s2.connect(h2);h2.connect(g2);g2.connect(o);s2.start();s2.stop(c.currentTime+.03);},55+R()*100);
+    setTimeout(drop,300+R()*850);};drop();return()=>{on=false;tryStop(bed);};
+};
+GENERATORS['rain-window']=(c,o)=>{
+  // Muffled outdoor rain heard through glass (lowpass, quiet)
+  const out=ns(c,'pink'),ol=bq(c,'lowpass',320),og2=c.createGain();og2.gain.value=0.05;out.connect(ol);ol.connect(og2);og2.connect(o);out.start();
+  let on=true;
+  const tick=()=>{if(!on)return;const sz=R(); // 0=small, 1=large drop
+    const vol=0.05+sz*0.1;
+    // Glass impact: very brief high-freq click (the "tck" sound)
+    const s=ns(c,'white'),hp=bq(c,'highpass',4000),lp2=bq(c,'lowpass',10000),g=c.createGain();g.gain.setValueAtTime(vol,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.012);s.connect(hp);hp.connect(lp2);lp2.connect(g);g.connect(o);s.start();s.stop(c.currentTime+.018);
+    // Window pane resonance — low freq (real glass ~150-300Hz)
+    const f=160+R()*100,ob=c.createOscillator(),rg=c.createGain();ob.type='sine';ob.frequency.value=f;rg.gain.setValueAtTime(vol*0.6,c.currentTime);rg.gain.exponentialRampToValueAtTime(.001,c.currentTime+0.7+sz*0.5);ob.connect(rg);rg.connect(o);ob.start();ob.stop(c.currentTime+1.4);
+    // Frame/sill secondary resonance
+    const ob2=c.createOscillator(),rg2=c.createGain();ob2.type='sine';ob2.frequency.value=f*1.78;rg2.gain.setValueAtTime(vol*0.12,c.currentTime);rg2.gain.exponentialRampToValueAtTime(.001,c.currentTime+0.18);ob2.connect(rg2);rg2.connect(o);ob2.start();ob2.stop(c.currentTime+.22);
+    // Larger drops leave a water streak (quiet hiss sliding down)
+    if(sz>0.6){const rs=ns(c,'white'),rsh=bq(c,'highpass',5000),rsl=bq(c,'lowpass',12000),rsg=c.createGain();rsg.gain.setValueAtTime(0,c.currentTime+.015);rsg.gain.linearRampToValueAtTime(.018,c.currentTime+.05);rsg.gain.exponentialRampToValueAtTime(.001,c.currentTime+.32);rs.connect(rsh);rsh.connect(rsl);rsl.connect(rsg);rsg.connect(o);rs.start();rs.stop(c.currentTime+.38);}
+    setTimeout(tick,450+R()*1300);};tick();return()=>{on=false;tryStop(out);};
+};
+GENERATORS['distant-thunder']=(c,o)=>{
+  // Near-silence — just a breath of subsonic air
+  const bed=ns(c,'brown'),bl=bq(c,'lowpass',60),bg=c.createGain();bg.gain.value=0.014;bed.connect(bl);bl.connect(bg);bg.connect(o);bed.start();
+  let on=true;
+  const rumble=()=>{if(!on)return;const dur=5.5+R()*4,t=c.currentTime;
+    // Three overlapping very-low frequencies — "rolling" character
+    [[20+R()*7,.20],[32+R()*9,.13],[46+R()*12,.07]].forEach(([f,v],i)=>{
+      const ro=c.createOscillator(),rg=c.createGain();ro.type='sine';ro.frequency.value=f;
+      const d=i*0.35+R()*0.2; // staggered start = rolling feel
+      rg.gain.setValueAtTime(0,t+d);rg.gain.linearRampToValueAtTime(v,t+d+dur*0.3);rg.gain.setValueAtTime(v,t+d+dur*0.55);rg.gain.exponentialRampToValueAtTime(.001,t+d+dur);ro.connect(rg);rg.connect(o);ro.start();ro.stop(t+d+dur+.2);});
+    // Low noise swell (the "whomp" of distant air compression)
+    const wn=ns(c,'pink'),wl=bq(c,'lowpass',90),wg=c.createGain();wg.gain.setValueAtTime(0,t);wg.gain.linearRampToValueAtTime(.09,t+dur*0.28);wg.gain.setValueAtTime(.09,t+dur*0.6);wg.gain.exponentialRampToValueAtTime(.001,t+dur+0.8);wn.connect(wl);wl.connect(wg);wg.connect(o);wn.start();wn.stop(t+dur+1);
+    setTimeout(rumble,13000+R()*12000);};setTimeout(rumble,1800+R()*2500);return()=>{on=false;tryStop(bed);};
 };
 GENERATORS['forest']=(c,o)=>{
   // Leaf rustle bed
