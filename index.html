@@ -925,8 +925,9 @@ input[type=range]::-moz-range-thumb { width:14px;height:14px;border:none;border-
     <div class="td-field-group">
       <label class="td-label">Bucket</label>
       <select class="td-select" id="tdBucketSelect">
-        <option value="now">To do</option>
-        <option value="later">Do Later</option>
+        <option value="now">Today</option>
+        <option value="later">This Week</option>
+        <option value="month">This Month</option>
       </select>
     </div>
     <div class="td-field-group">
@@ -1001,6 +1002,7 @@ input[type=range]::-moz-range-thumb { width:14px;height:14px;border:none;border-
         <div class="task-tabs" id="taskTabs">
           <button class="task-tab active" data-tab="now">Today <span class="tab-badge" id="tab-badge-now"></span></button>
           <button class="task-tab" data-tab="later">This Week <span class="tab-badge" id="tab-badge-later"></span></button>
+          <button class="task-tab" data-tab="month">This Month <span class="tab-badge" id="tab-badge-month"></span></button>
           <button class="task-tab" data-tab="done">Done <span class="tab-badge" id="tab-badge-done"></span></button>
         </div>
       </div>
@@ -1713,7 +1715,9 @@ function saveTasks() { localStorage.setItem('focus-tasks', JSON.stringify(tasks)
 
 function getTabForTask(task) {
   if (task.done) return 'done';
-  return task.bucket === 'later' ? 'later' : 'now';
+  if (task.bucket === 'later') return 'later';
+  if (task.bucket === 'month') return 'month';
+  return 'now';
 }
 
 function getDateGroup(isoStr) {
@@ -1738,14 +1742,17 @@ function getGroupLabel(id) {
 }
 
 function renderTabBadges() {
-  const nowCount   = tasks.filter(t => !t.done && t.bucket !== 'later').length;
+  const nowCount   = tasks.filter(t => !t.done && t.bucket === 'now').length;
   const laterCount = tasks.filter(t => !t.done && t.bucket === 'later').length;
+  const monthCount = tasks.filter(t => !t.done && t.bucket === 'month').length;
   const doneCount  = tasks.filter(t => t.done).length;
   const nb = document.getElementById('tab-badge-now');
   const lb = document.getElementById('tab-badge-later');
+  const mb = document.getElementById('tab-badge-month');
   const db = document.getElementById('tab-badge-done');
   if (nb) { nb.textContent = nowCount   || ''; nb.classList.toggle('visible', nowCount   > 0); }
   if (lb) { lb.textContent = laterCount || ''; lb.classList.toggle('visible', laterCount > 0); }
+  if (mb) { mb.textContent = monthCount || ''; mb.classList.toggle('visible', monthCount > 0); }
   if (db) { db.textContent = doneCount  || ''; db.classList.toggle('visible', doneCount  > 0); }
 }
 
