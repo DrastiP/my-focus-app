@@ -412,7 +412,7 @@ input[type=range]::-moz-range-thumb { width:14px;height:14px;border:none;border-
 .preset-save-btn:hover { opacity: .85; }
 
 /* ── Task tabs ──────────────────────────────────── */
-.task-tabs { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 14px; }
+.task-tabs { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 14px; align-items: center; }
 .task-tab {
   background: rgba(255,248,240,.04); border: 1px solid rgba(255,248,240,.1);
   border-radius: 8px; padding: 4px 9px; font-size: .66rem; font-weight: 600;
@@ -422,6 +422,7 @@ input[type=range]::-moz-range-thumb { width:14px;height:14px;border:none;border-
 }
 .task-tab:hover { color: var(--cream); border-color: rgba(255,248,240,.2); }
 .task-tab.active { background: var(--accent-card-bg); border-color: var(--accent-card-br); color: var(--accent); }
+.task-tab[data-tab="done"] { margin-left: auto; }
 .task-tab[data-tab="done"].active { background: rgba(138,171,126,.18); border-color: rgba(138,171,126,.45); color: #8aab7e; }
 .tab-badge {
   background: var(--accent); color: #16100a;
@@ -1000,7 +1001,8 @@ input[type=range]::-moz-range-thumb { width:14px;height:14px;border:none;border-
           <button class="task-add" id="taskAddBtn">Add</button>
         </div>
         <div class="task-tabs" id="taskTabs">
-          <button class="task-tab active" data-tab="now">Today <span class="tab-badge" id="tab-badge-now"></span></button>
+          <button class="task-tab active" data-tab="all">All <span class="tab-badge" id="tab-badge-all"></span></button>
+          <button class="task-tab" data-tab="now">Today <span class="tab-badge" id="tab-badge-now"></span></button>
           <button class="task-tab" data-tab="later">This Week <span class="tab-badge" id="tab-badge-later"></span></button>
           <button class="task-tab" data-tab="month">This Month <span class="tab-badge" id="tab-badge-month"></span></button>
           <button class="task-tab" data-tab="done">Done <span class="tab-badge" id="tab-badge-done"></span></button>
@@ -1678,7 +1680,7 @@ document.getElementById('presetNameInput').addEventListener('keydown',e=>{if(e.k
 // ═══════════════════════════════════════════════════════════════
 //  TASK LIST
 // ═══════════════════════════════════════════════════════════════
-let activeTab   = 'now';
+let activeTab   = 'all';
 let activeGroup = 'all';
 let sidebarView = 'tasks';
 
@@ -1742,14 +1744,17 @@ function getGroupLabel(id) {
 }
 
 function renderTabBadges() {
+  const allCount   = tasks.filter(t => !t.done).length;
   const nowCount   = tasks.filter(t => !t.done && t.bucket === 'now').length;
   const laterCount = tasks.filter(t => !t.done && t.bucket === 'later').length;
   const monthCount = tasks.filter(t => !t.done && t.bucket === 'month').length;
   const doneCount  = tasks.filter(t => t.done).length;
+  const ab = document.getElementById('tab-badge-all');
   const nb = document.getElementById('tab-badge-now');
   const lb = document.getElementById('tab-badge-later');
   const mb = document.getElementById('tab-badge-month');
   const db = document.getElementById('tab-badge-done');
+  if (ab) { ab.textContent = allCount   || ''; ab.classList.toggle('visible', allCount   > 0); }
   if (nb) { nb.textContent = nowCount   || ''; nb.classList.toggle('visible', nowCount   > 0); }
   if (lb) { lb.textContent = laterCount || ''; lb.classList.toggle('visible', laterCount > 0); }
   if (mb) { mb.textContent = monthCount || ''; mb.classList.toggle('visible', monthCount > 0); }
@@ -1810,7 +1815,12 @@ function renderTasks() {
   if (clearRow) clearRow.style.display = activeTab === 'done' ? 'flex' : 'none';
   taskList.innerHTML = '';
 
-  let filtered = tasks.map((t, i) => ({ ...t, _i: i })).filter(t => getTabForTask(t) === activeTab);
+  let filtered = tasks.map((t, i) => ({ ...t, _i: i }));
+  if (activeTab === 'all') {
+    filtered = filtered.filter(t => !t.done);
+  } else {
+    filtered = filtered.filter(t => getTabForTask(t) === activeTab);
+  }
   if (activeGroup !== 'all') filtered = filtered.filter(t => t.group === activeGroup);
 
   if (!filtered.length) {
