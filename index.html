@@ -1261,17 +1261,6 @@ GENERATORS['chimes']=(c,o)=>{
     const sn=ns(c,'white'),sh=bq(c,'highpass',3000),sg=c.createGain();sg.gain.setValueAtTime(.04,c.currentTime);sg.gain.exponentialRampToValueAtTime(.001,c.currentTime+.025);sn.connect(sh);sh.connect(sg);sg.connect(o);sn.start();sn.stop(c.currentTime+.035);
     setTimeout(ring,2200+R()*4000);};ring();return()=>{on=false;};
 };
-GENERATORS['traffic']=(c,o)=>{
-  // Constant city bed
-  const bed=ns(c,'pink'),l=bq(c,'lowpass',180),bg=c.createGain();bg.gain.value=0.12;bed.connect(l);l.connect(bg);bg.connect(o);bed.start();
-  let on=true;const carPass=()=>{if(!on)return;const dur=2+R()*2.2,spd=R();
-    // Doppler noise whoosh
-    const s2=ns(c,'pink'),b=bq(c,'bandpass',300+spd*150,1.5),g=c.createGain();g.gain.setValueAtTime(0,c.currentTime);g.gain.linearRampToValueAtTime(.22+spd*.1,c.currentTime+dur*.28);g.gain.linearRampToValueAtTime(0,c.currentTime+dur);s2.connect(b);b.connect(g);g.connect(o);s2.start();s2.stop(c.currentTime+dur+.1);
-    // Engine tone (Doppler pitch shift)
-    const en=c.createOscillator(),eg=c.createGain();en.type='sawtooth';en.frequency.setValueAtTime(100+spd*60,c.currentTime);en.frequency.linearRampToValueAtTime(65+spd*25,c.currentTime+dur);eg.gain.setValueAtTime(0,c.currentTime);eg.gain.linearRampToValueAtTime(.038,c.currentTime+dur*.3);eg.gain.linearRampToValueAtTime(0,c.currentTime+dur);en.connect(eg);eg.connect(o);en.start();en.stop(c.currentTime+dur+.1);
-    setTimeout(carPass,1800+R()*4500);};carPass();return()=>{on=false;tryStop(bed);};
-};
-GENERATORS['subway']=(c,o)=>{const bed=ns(c,'pink'),l=bq(c,'lowpass',300),bg=c.createGain();bg.gain.value=0.26;bed.connect(l);l.connect(bg);bg.connect(o);bed.start();[82,164,246].forEach((f,i)=>{const d=c.createOscillator(),dg=c.createGain();d.type='sawtooth';d.frequency.value=f;dg.gain.value=[.048,.024,.01][i];d.connect(dg);dg.connect(o);d.start();});let on=true;const clack=()=>{if(!on)return;[0,110,220,330].forEach(dl=>setTimeout(()=>{if(!on)return;const s2=ns(c,'white'),h=bq(c,'bandpass',550+R()*100,4),g=c.createGain();g.gain.setValueAtTime(.085,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.065);s2.connect(h);h.connect(g);g.connect(o);s2.start();s2.stop(c.currentTime+.08);},dl));setTimeout(clack,440+R()*45);};clack();return()=>{on=false;tryStop(bed);};};
 GENERATORS['coffee']=(c,o)=>{
   // Ambient room chatter — 3 formant bands
   [480,750,1150].forEach((f,i)=>{const vb=ns(c,'pink'),vf=bq(c,'bandpass',f,1.4),vg=c.createGain();vg.gain.value=[.09,.065,.038][i];vb.connect(vf);vf.connect(vg);vg.connect(o);vb.start();});
@@ -1309,28 +1298,6 @@ GENERATORS['typing']=(c,o)=>{let on=true;const burst=()=>{if(!on)return;const n=
 GENERATORS['office-chat']=(c,o)=>{
   [420,680,1050,1450].forEach((f,i)=>{const vb=ns(c,'pink'),vf=bq(c,'bandpass',f,1.3),vg=c.createGain();vg.gain.value=[.09,.07,.045,.025][i];vb.connect(vf);vf.connect(vg);vg.connect(o);vb.start();});
   let on=true;const murmur=()=>{if(!on)return;const s2=ns(c,'pink'),bf=bq(c,'bandpass',600+R()*500,1.6),g=c.createGain(),dur=.18+R()*.5;g.gain.setValueAtTime(0,c.currentTime);g.gain.linearRampToValueAtTime(.08,c.currentTime+.04);g.gain.setValueAtTime(.08,c.currentTime+dur-.04);g.gain.linearRampToValueAtTime(0,c.currentTime+dur);s2.connect(bf);bf.connect(g);g.connect(o);s2.start();s2.stop(c.currentTime+dur+.02);setTimeout(murmur,100+R()*600);};murmur();return()=>{on=false;};};
-GENERATORS['airplane']=(c,o)=>{
-  // Engine harmonic stack (4 sawtooth partials)
-  [105,210,315,420].forEach((f,i)=>{const d=c.createOscillator(),dg=c.createGain();d.type='sawtooth';d.frequency.value=f;dg.gain.value=[.065,.04,.022,.01][i];d.connect(dg);dg.connect(o);d.start();});
-  // Air rush noise (cabin pressure hiss)
-  const air=ns(c,'pink'),al=bq(c,'lowpass',480),ag=c.createGain();ag.gain.value=0.18;air.connect(al);al.connect(ag);ag.connect(o);air.start();
-  // High-freq air leak (thin hiss)
-  const hi=ns(c,'white'),hh=bq(c,'highpass',4000),hg=c.createGain();hg.gain.value=0.04;hi.connect(hh);hh.connect(hg);hg.connect(o);hi.start();
-  // Gentle LFO for slight engine variation
-  const lfo=c.createOscillator(),lg=c.createGain();lfo.type='sine';lfo.frequency.value=0.06;lg.gain.value=0.02;lfo.connect(lg);lg.connect(ag.gain);lfo.start();
-  return()=>{tryStop(air);tryStop(hi);tryStop(lfo);};
-};
-GENERATORS['train']=(c,o)=>{
-  // Engine rumble
-  const bed=ns(c,'pink'),l=bq(c,'lowpass',280),bg=c.createGain();bg.gain.value=0.22;bed.connect(l);l.connect(bg);bg.connect(o);bed.start();
-  const eng=c.createOscillator(),eg=c.createGain();eng.type='sawtooth';eng.frequency.value=62;eg.gain.value=.055;eng.connect(eg);eg.connect(o);eng.start();
-  // Rhythmic 2-beat clack (strong + weak)
-  let on=true;const cl=()=>{if(!on)return;[0,190].forEach(dl=>setTimeout(()=>{if(!on)return;const ss=ns(c,'white'),h=bq(c,'bandpass',500+R()*80,3.5),g=c.createGain();g.gain.setValueAtTime(dl===0?.13:.085,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.09);ss.connect(h);h.connect(g);g.connect(o);ss.start();ss.stop(c.currentTime+.11);},dl));setTimeout(cl,960+R()*65);};cl();
-  // Distant horn (rare)
-  const horn=()=>{if(!on)return;[220,275,330].forEach((f,i)=>{const ob=c.createOscillator(),hg=c.createGain();ob.type='sawtooth';ob.frequency.value=f;hg.gain.setValueAtTime(0,c.currentTime+i*.05);hg.gain.linearRampToValueAtTime(.025,c.currentTime+i*.05+.15);hg.gain.setValueAtTime(.025,c.currentTime+.9);hg.gain.linearRampToValueAtTime(0,c.currentTime+1.2);ob.connect(hg);hg.connect(o);ob.start();ob.stop(c.currentTime+1.3);});setTimeout(horn,18000+R()*25000);};setTimeout(horn,8000+R()*12000);
-  return()=>{on=false;tryStop(bed);tryStop(eng);};
-};
-
 function fireCrackle(c,o,alive){
   const cr=()=>{if(!alive())return;const s2=ns(c,'white'),h=bq(c,'bandpass',700+R()*1600,2.5),g=c.createGain();const v=.05+R()*.08;g.gain.setValueAtTime(0,c.currentTime);g.gain.linearRampToValueAtTime(v,c.currentTime+.009);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.05+R()*.1);s2.connect(h);h.connect(g);g.connect(o);s2.start();s2.stop(c.currentTime+.18);setTimeout(cr,100+R()*480);};cr();
   const pop=()=>{if(!alive())return;const ob=c.createOscillator(),g=c.createGain();ob.type='sine';ob.frequency.setValueAtTime(180+R()*120,c.currentTime);ob.frequency.exponentialRampToValueAtTime(55,c.currentTime+.1);g.gain.setValueAtTime(.12,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.16);ob.connect(g);g.connect(o);ob.start();ob.stop(c.currentTime+.18);setTimeout(pop,1800+R()*4500);};pop();
@@ -1620,7 +1587,6 @@ const CATEGORIES = [
   {id:'rain',label:'🌧 Rain',sounds:[{id:'light-rain',name:'Light Rain',icon:'🌦'},{id:'rain-window',name:'Rain on Window',icon:'🪟'},{id:'distant-thunder',name:'Distant Thunder',icon:'🌩'}]},
   {id:'nature',label:'🌿 Nature',sounds:[{id:'forest',name:'Forest',icon:'🌲'},{id:'ocean',name:'Ocean Waves',icon:'🌊'},{id:'river',name:'River / Stream',icon:'💧'},{id:'birds',name:'Birds',icon:'🐦'}]},
   {id:'zen',label:'🧘 Zen',sounds:[{id:'alpha',name:'Alpha Waves',icon:'🧠'},{id:'theta',name:'Theta Waves',icon:'✨'},{id:'chimes',name:'Soft Chimes',icon:'🔔'}]},
-  {id:'urban',label:'🏙 Urban',sounds:[{id:'traffic',name:'Traffic',icon:'🚗'},{id:'subway',name:'Subway',icon:'🚇'},{id:'airplane',name:'Airplane',icon:'✈️'},{id:'train',name:'Train',icon:'🚂'}]},
   {id:'workspace',label:'💼 Workspace',sounds:[{id:'coffee',name:'Coffee Shop',icon:'☕'},{id:'library',name:'Library',icon:'📚'},{id:'typing',name:'Typing',icon:'⌨️'},{id:'office-chat',name:'Office Chatter',icon:'🗣️'}]},
   {id:'cozy',label:'🔥 Cozy',sounds:[{id:'fireplace',name:'Fireplace',icon:'🔥'},{id:'cabin',name:'Cabin',icon:'🛖'}]},
   {id:'instrumental',label:'🎹 Instrumental',sounds:[{id:'lofi',name:'Lo-fi Beats',icon:'🎵'},{id:'piano',name:'Piano',icon:'🎹'},{id:'guitar',name:'Guitar',icon:'🎸'}]},
