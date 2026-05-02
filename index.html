@@ -999,8 +999,8 @@ input[type=range]::-moz-range-thumb { width:14px;height:14px;border:none;border-
           <button class="task-add" id="taskAddBtn">Add</button>
         </div>
         <div class="task-tabs" id="taskTabs">
-          <button class="task-tab active" data-tab="now">To Do Now <span class="tab-badge" id="tab-badge-now"></span></button>
-          <button class="task-tab" data-tab="later">Do Later <span class="tab-badge" id="tab-badge-later"></span></button>
+          <button class="task-tab active" data-tab="now">Today <span class="tab-badge" id="tab-badge-now"></span></button>
+          <button class="task-tab" data-tab="later">This Week <span class="tab-badge" id="tab-badge-later"></span></button>
           <button class="task-tab" data-tab="done">Done <span class="tab-badge" id="tab-badge-done"></span></button>
         </div>
       </div>
@@ -1873,7 +1873,7 @@ function addTask() {
   const v = taskInput.value.trim();
   if (!v) return;
   const group = selectedAddGroup || (activeGroup !== 'all' ? activeGroup : (taskGroups[0] ? taskGroups[0].id : 'work'));
-  tasks.push({ text: v, done: false, bucket: activeTab === 'later' ? 'later' : 'now', group, dueDate: null, createdAt: new Date().toISOString() });
+  tasks.push({ text: v, done: false, bucket: 'now', group, dueDate: null, createdAt: new Date().toISOString() });
   taskInput.value = '';
   saveTasks();
   renderTasks();
